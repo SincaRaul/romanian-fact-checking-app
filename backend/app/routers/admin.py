@@ -1,25 +1,9 @@
-cd C:\Licenta\flutter_application_1; git commit -m "🚀 Initial commit: Complete Romanian Fact-Checking App
-Features implemented:
-- Flutter frontend with Material Design 3
-- FastAPI backend with PostgreSQL + Redis
-- Complete category system with Romanian labels
-- Docker containerization
-- Riverpod state management
-- GoRouter navigation
-- API integration with error handling
-- Seed data with categorized fact-checks
-
-🗂️ Categories: Football, Politics, Health, Bills, Technology, etc.
-🤖 AI ready: Gemini service prepared for auto-categorization
-📱 Responsive: Web and mobile ready
-
-Architecture: Flutter + FastAPI + PostgreSQL + Redis + Docker
-Last updated: August 24, 2025"from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import get_db
 from app import models
-import uuid
 from datetime import datetime, timedelta
+import uuid
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -32,46 +16,49 @@ def seed_database(db: Session = Depends(get_db)):
     db.query(models.Check).delete()
     db.query(models.Question).delete()
     
-    # Date de test pentru întrebări și fact-check-uri românești
+    # Commit pentru a șterge datele
+    db.commit()
+    
+    # Date pentru întrebări
     sample_questions = [
         {
             "id": str(uuid.uuid4()),
-            "title": "România este membră NATO din 2004?",
-            "body": "Am auzit că România a aderat la NATO în 2004. Este adevărat?",
-            "status": "checked",
+            "title": "Este adevărat că România a aderat la NATO în 2004?",
+            "body": "Am văzut informații contradictorii despre data aderării României la NATO. Când a avut loc exact acest eveniment?",
+            "status": "answered",
             "votes_count": 15
         },
         {
             "id": str(uuid.uuid4()),
-            "title": "Bucureștiul este cel mai mare oraș din România?",
-            "body": "Care este cel mai mare oraș din România după numărul de locuitori?",
-            "status": "checked", 
+            "title": "Care este populația actuală a Bucureștiului?",
+            "body": "Aud cifre diferite despre numărul locuitorilor din București. Care este populația oficială actuală?",
+            "status": "answered",
             "votes_count": 23
         },
         {
             "id": str(uuid.uuid4()),
             "title": "Vaccinurile COVID-19 conțin cipuri de monitorizare?",
-            "body": "Am citit pe Facebook că vaccinurile COVID-19 conțin cipuri pentru monitorizare. Este adevărat?",
-            "status": "checked",
+            "body": "Circulă informații că vaccinurile COVID-19 ar conține tehnologie de urmărire. Este aceasta o informație corectă?",
+            "status": "answered",
             "votes_count": 87
         },
         {
             "id": str(uuid.uuid4()),
-            "title": "România exportă mai mult gaze naturale decât importă?",
-            "body": "România este exportator net de gaze naturale?",
-            "status": "checked",
+            "title": "România exportă sau importă gaze naturale?",
+            "body": "Nu sunt sigur dacă România este exportator sau importator net de gaze naturale. Care este situația actuală?",
+            "status": "answered",
             "votes_count": 12
         },
         {
             "id": str(uuid.uuid4()),
-            "title": "Vitamina C previne răceala comună?",
-            "body": "Dacă iau vitamina C zilnic, nu mă voi îmbolnăvi de răceală?",
-            "status": "checked",
+            "title": "Vitamina C previne răceala?",
+            "body": "Se spune că vitamina C previne răceala. Este aceasta o afirmație științifică corectă?",
+            "status": "answered",
             "votes_count": 34
         }
     ]
     
-    # Creează întrebările în baza de date
+    # Adaugă întrebările în baza de date
     questions = []
     for q_data in sample_questions:
         question = models.Question(
@@ -146,16 +133,16 @@ def seed_database(db: Session = Depends(get_db)):
         )
         db.add(check)
     
-    # Salvează schimbările
+    # Commit pentru a salva toate datele
     db.commit()
     
-    # Verifică datele create
+    # Returnează un summary
     total_questions = db.query(models.Question).count()
     total_checks = db.query(models.Check).count()
     
     return {
         "message": "Database seeded successfully!",
-        "questions_created": len(questions),
+        "questions_created": len(sample_questions),
         "checks_created": len(sample_checks),
         "total_questions": total_questions,
         "total_checks": total_checks
