@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug OnBoarding</title>
+</head>
+<body>
+    <h1>Debug Onboarding Status</h1>
+    <button onclick="checkStatus()">Check Status</button>
+    <button onclick="resetOnboarding()">Reset Onboarding</button>
+    <div id="result"></div>
+
+    <script>
+        function checkStatus() {
+            const completed = localStorage.getItem('flutter.onboarding_completed') || 'false';
+            const categories = localStorage.getItem('flutter.selected_categories') || '[]';
+            
+            document.getElementById('result').innerHTML = `
+                <h3>Status:</h3>
+                <p>Completed: ${completed}</p>
+                <p>Categories: ${categories}</p>
+            `;
+        }
+
+        function resetOnboarding() {
+            localStorage.removeItem('flutter.onboarding_completed');
+            localStorage.removeItem('flutter.selected_categories');
+            document.getElementById('result').innerHTML = '<p>Onboarding reset! Refresh the Flutter app.</p>';
+        }
+    </script>
+</body>
+</html>

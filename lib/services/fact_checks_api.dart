@@ -35,6 +35,22 @@ class FactChecksApi {
     }
   }
 
+  /// Get fact checks by categories
+  Future<List<FactCheck>> getByCategories(List<String> categories) async {
+    try {
+      final categoriesParam = categories.join(',');
+      final response = await _apiService.dio.get(
+        '/fact-checks',
+        queryParameters: {'categories': categoriesParam},
+      );
+
+      final List<dynamic> data = response.data as List;
+      return data.map((json) => _factCheckFromApi(json)).toList();
+    } on DioException catch (e) {
+      throw Exception('Failed to get fact checks by categories: ${e.message}');
+    }
+  }
+
   /// Convert API response to FactCheck model
   FactCheck _factCheckFromApi(Map<String, dynamic> json) {
     // Map API verdict to our enum

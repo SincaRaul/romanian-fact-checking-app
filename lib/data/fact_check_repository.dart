@@ -92,4 +92,10 @@ class FactCheckRepository implements FactCheckRepositoryInterface {
 
     return stats;
   }
+
+  @override
+  Future<List<FactCheck>> getByCategories(List<String> categories) async {
+    // For mock repository, just return all fact checks (simplified)
+    return getLatest();
+  }
 }

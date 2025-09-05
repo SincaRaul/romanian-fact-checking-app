@@ -89,4 +89,14 @@ class ApiFactCheckRepository implements FactCheckRepositoryInterface {
       return {for (final v in Verdict.values) v: 0};
     }
   }
+
+  @override
+  Future<List<FactCheck>> getByCategories(List<String> categories) async {
+    try {
+      return await _api.getByCategories(categories);
+    } catch (e) {
+      debugPrint('Error fetching fact checks by categories: $e');
+      return [];
+    }
+  }
 }

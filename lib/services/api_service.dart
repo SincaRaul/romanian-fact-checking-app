@@ -26,4 +26,14 @@ class ApiService {
   }
 
   Dio get dio => _dio;
+
+  // GET request method
+  Future<Response> get(String path, {Map<String, dynamic>? queryParameters}) {
+    return _dio.get(path, queryParameters: queryParameters);
+  }
+
+  // POST request method
+  Future<Response> post(String path, {dynamic data}) {
+    return _dio.post(path, data: data);
+  }
 }

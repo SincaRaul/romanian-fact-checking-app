@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'providers/fact_check_providers.dart';
+import 'providers/onboarding_providers.dart';
 import 'models/fact_check.dart';
 import 'utils/verdict_extensions.dart';
 import 'screens/fact_check_details_screen.dart';
+import 'screens/onboarding_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +18,42 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final onboardingState = ref.watch(onboardingProvider);
+    
+    // Debug print
+    print('🔍 Onboarding state: $onboardingState');
+    
+    // Debug reset (remove this later)
+    // if (onboardingState is OnboardingCompleted) {
+    //   ref.read(onboardingProvider.notifier).resetOnboarding();
+    // }
+    
     final router = GoRouter(
       initialLocation: '/',
+      redirect: (context, state) {
+        print('🔄 Redirect check: ${state.matchedLocation}, State: $onboardingState');
+        
+        // Simplified redirect logic
+        if (onboardingState is OnboardingNotStarted) {
+          if (state.matchedLocation != '/onboarding') {
+            print('➡️ Redirecting to onboarding');
+            return '/onboarding';
+          }
+        } else if (onboardingState is OnboardingCompleted) {
+          if (state.matchedLocation == '/onboarding') {
+            print('➡️ Redirecting to home');
+            return '/';
+          }
+        }
+        
+        return null; // No redirect needed
+      },
       routes: [
+        GoRoute(
+          path: '/onboarding',
+          name: 'onboarding',
+          builder: (context, state) => const OnboardingScreen(),
+        ),
         GoRoute(
           path: '/',
           name: 'home',
@@ -51,13 +86,20 @@ class MyApp extends ConsumerWidget {
     );
 
     return MaterialApp.router(
-      title: 'Factual Clone',
+      title: 'Fact Check România',
       debugShowCheckedModeBanner: false,
       routerConfig: router,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      builder: (context, child) {
+        // Show loading screen while checking onboarding status
+        return switch (onboardingState) {
+          OnboardingLoading() => const _LoadingScreen(),
+          _ => child ?? const SizedBox(),
+        };
+      },
     );
   }
 }
@@ -74,7 +116,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final asyncChecks = ref.watch(latestFactChecksProvider);
+    final asyncChecks = ref.watch(personalizedFactChecksProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Ultimele verificări')),
@@ -321,4 +363,40 @@ class VerdictIcon extends StatelessWidget {
 String _formatDate(DateTime d) {
   String two(int n) => n.toString().padLeft(2, '0');
   return '${d.year}-${two(d.month)}-${two(d.day)}';
+}
+
+// Loading screen widget
+class _LoadingScreen extends StatelessWidget {
+  const _LoadingScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 24),
+            Text(
+              'Fact Check România',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Se încarcă...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

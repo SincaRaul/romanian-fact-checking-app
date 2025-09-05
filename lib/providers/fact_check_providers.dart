@@ -4,6 +4,7 @@ import '../data/api_fact_check_repository.dart';
 import '../data/fact_check_repository_interface.dart';
 import '../services/api_service.dart';
 import '../models/fact_check.dart';
+import 'onboarding_providers.dart';
 
 // Configuration: toggle between mock and real API
 const bool useRealApi = true; // Set to true when backend is ready
@@ -21,9 +22,25 @@ final factCheckRepoProvider = Provider<FactCheckRepositoryInterface>((ref) {
   }
 });
 
-// Latest fact checks provider
+// Latest fact checks provider (all fact-checks)
 final latestFactChecksProvider = FutureProvider<List<FactCheck>>(
   (ref) => ref.watch(factCheckRepoProvider).getLatest(),
+);
+
+// Personalized fact checks provider (based on selected categories)
+final personalizedFactChecksProvider = FutureProvider<List<FactCheck>>(
+  (ref) async {
+    final selectedCategories = ref.watch(selectedCategoriesProvider);
+    final repository = ref.watch(factCheckRepoProvider);
+    
+    // If no categories selected, show all
+    if (selectedCategories.isEmpty) {
+      return repository.getLatest();
+    }
+    
+    // Get fact-checks for selected categories
+    return repository.getByCategories(selectedCategories);
+  },
 );
 
 // Fact check by ID provider

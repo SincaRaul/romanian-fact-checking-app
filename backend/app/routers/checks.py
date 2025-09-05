@@ -10,7 +10,8 @@ router = APIRouter(prefix="", tags=["checks"])
 def latest_checks(
     db: Session = Depends(get_db), 
     limit: int = 20,
-    category: Optional[str] = Query(None, description="Filter by category")
+    category: Optional[str] = Query(None, description="Filter by single category"),
+    categories: Optional[str] = Query(None, description="Filter by multiple categories (comma-separated)")
 ):
     query = (
         db.query(models.Check)
@@ -18,7 +19,12 @@ def latest_checks(
     )
     
     # Add category filter if provided
-    if category:
+    if categories:
+        # Support multiple categories: "politics_internal,health,football"
+        category_list = [cat.strip() for cat in categories.split(",")]
+        query = query.filter(models.Check.category.in_(category_list))
+    elif category:
+        # Backward compatibility for single category
         query = query.filter(models.Check.category == category)
     
     rows = query.order_by(models.Check.created_at.desc()).limit(limit).all()
