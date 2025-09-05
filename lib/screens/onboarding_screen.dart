@@ -20,7 +20,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -180,8 +179,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     return Material(
       elevation: isSelected ? 8 : 2,
       shadowColor: isSelected 
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.3)
-          : Colors.black.withOpacity(0.1),
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
+          : Colors.black.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: () => _toggleCategory(category.id),
@@ -193,7 +192,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             border: Border.all(
               color: isSelected 
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
             color: isSelected
@@ -210,8 +209,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.2)
-                        : Theme.of(context).colorScheme.surfaceVariant,
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                        : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

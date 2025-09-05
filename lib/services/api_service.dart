@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   static const String baseUrl = 'http://localhost:8000';
@@ -20,7 +21,7 @@ class ApiService {
       LogInterceptor(
         requestBody: true,
         responseBody: true,
-        logPrint: (o) => print('[API] $o'),
+        logPrint: (o) => debugPrint('[API] $o'),
       ),
     );
   }

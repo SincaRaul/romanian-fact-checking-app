@@ -21,7 +21,7 @@ class MyApp extends ConsumerWidget {
     final onboardingState = ref.watch(onboardingProvider);
     
     // Debug print
-    print('🔍 Onboarding state: $onboardingState');
+    debugPrint('🔍 Onboarding state: $onboardingState');
     
     // Debug reset (remove this later)
     // if (onboardingState is OnboardingCompleted) {
@@ -31,17 +31,17 @@ class MyApp extends ConsumerWidget {
     final router = GoRouter(
       initialLocation: '/',
       redirect: (context, state) {
-        print('🔄 Redirect check: ${state.matchedLocation}, State: $onboardingState');
+        debugPrint('🔄 Redirect check: ${state.matchedLocation}, State: $onboardingState');
         
         // Simplified redirect logic
         if (onboardingState is OnboardingNotStarted) {
           if (state.matchedLocation != '/onboarding') {
-            print('➡️ Redirecting to onboarding');
+            debugPrint('➡️ Redirecting to onboarding');
             return '/onboarding';
           }
         } else if (onboardingState is OnboardingCompleted) {
           if (state.matchedLocation == '/onboarding') {
-            print('➡️ Redirecting to home');
+            debugPrint('➡️ Redirecting to home');
             return '/';
           }
         }
@@ -372,7 +372,6 @@ class _LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surface,
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
