@@ -11,8 +11,9 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final isCompleted = prefs.getBool('onboarding_completed') ?? false;
-      final selectedCategories = prefs.getStringList('selected_categories') ?? [];
-      
+      final selectedCategories =
+          prefs.getStringList('selected_categories') ?? [];
+
       if (isCompleted) {
         state = OnboardingState.completed(selectedCategories);
       } else {
@@ -28,7 +29,7 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('onboarding_completed', true);
       await prefs.setStringList('selected_categories', selectedCategories);
-      
+
       state = OnboardingState.completed(selectedCategories);
     } catch (e) {
       state = OnboardingState.error(e.toString());
@@ -40,8 +41,19 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('onboarding_completed');
       await prefs.remove('selected_categories');
-      
+
       state = const OnboardingState.notStarted();
+    } catch (e) {
+      state = OnboardingState.error(e.toString());
+    }
+  }
+
+  Future<void> updateSelectedCategories(List<String> selectedCategories) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList('selected_categories', selectedCategories);
+
+      state = OnboardingState.completed(selectedCategories);
     } catch (e) {
       state = OnboardingState.error(e.toString());
     }
@@ -51,10 +63,11 @@ class OnboardingNotifier extends StateNotifier<OnboardingState> {
 // Onboarding state
 sealed class OnboardingState {
   const OnboardingState();
-  
+
   const factory OnboardingState.loading() = OnboardingLoading;
   const factory OnboardingState.notStarted() = OnboardingNotStarted;
-  const factory OnboardingState.completed(List<String> selectedCategories) = OnboardingCompleted;
+  const factory OnboardingState.completed(List<String> selectedCategories) =
+      OnboardingCompleted;
   const factory OnboardingState.error(String message) = OnboardingError;
 }
 
@@ -77,9 +90,10 @@ class OnboardingError extends OnboardingState {
 }
 
 // Provider
-final onboardingProvider = StateNotifierProvider<OnboardingNotifier, OnboardingState>(
-  (ref) => OnboardingNotifier(),
-);
+final onboardingProvider =
+    StateNotifierProvider<OnboardingNotifier, OnboardingState>(
+      (ref) => OnboardingNotifier(),
+    );
 
 // Helper provider for selected categories
 final selectedCategoriesProvider = Provider<List<String>>((ref) {

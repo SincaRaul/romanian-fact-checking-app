@@ -19,7 +19,7 @@ class FactCheckDetailsScreen extends ConsumerWidget {
         title: const Text('Detalii Fact-Check'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: factCheckAsync.when(

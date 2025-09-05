@@ -3,11 +3,7 @@ class Category {
   final String label;
   final String icon;
 
-  const Category({
-    required this.id,
-    required this.label,
-    required this.icon,
-  });
+  const Category({required this.id, required this.label, required this.icon});
 
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
@@ -18,10 +14,6 @@ class Category {
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'label': label,
-      'icon': icon,
-    };
+    return {'id': id, 'label': label, 'icon': icon};
   }
 }

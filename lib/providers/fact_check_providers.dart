@@ -28,20 +28,20 @@ final latestFactChecksProvider = FutureProvider<List<FactCheck>>(
 );
 
 // Personalized fact checks provider (based on selected categories)
-final personalizedFactChecksProvider = FutureProvider<List<FactCheck>>(
-  (ref) async {
-    final selectedCategories = ref.watch(selectedCategoriesProvider);
-    final repository = ref.watch(factCheckRepoProvider);
-    
-    // If no categories selected, show all
-    if (selectedCategories.isEmpty) {
-      return repository.getLatest();
-    }
-    
-    // Get fact-checks for selected categories
-    return repository.getByCategories(selectedCategories);
-  },
-);
+final personalizedFactChecksProvider = FutureProvider<List<FactCheck>>((
+  ref,
+) async {
+  final selectedCategories = ref.watch(selectedCategoriesProvider);
+  final repository = ref.watch(factCheckRepoProvider);
+
+  // If no categories selected, show all
+  if (selectedCategories.isEmpty) {
+    return repository.getLatest();
+  }
+
+  // Get fact-checks for selected categories
+  return repository.getByCategories(selectedCategories);
+});
 
 // Fact check by ID provider
 final factCheckByIdProvider = FutureProvider.family<FactCheck?, String>(

@@ -27,7 +27,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 40),
-              
+
               // Header
               Text(
                 'Bun venit! 👋',
@@ -37,7 +37,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              
+
               Text(
                 'Alege categoriile care te interesează pentru a vedea știri personalizate pe pagina principală.',
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -46,12 +46,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 ),
               ),
               const SizedBox(height: 40),
-              
+
               // Categories Grid
               Expanded(
                 child: categoriesAsync.when(
                   data: (categories) => _buildCategoriesGrid(categories),
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stack) => Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -77,10 +78,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
               ),
-              
+
               // Bottom Section
               const SizedBox(height: 24),
-              
+
               // Selected count
               if (selectedCategories.isNotEmpty)
                 Container(
@@ -103,21 +104,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       Text(
                         '${selectedCategories.length} ${selectedCategories.length == 1 ? 'categorie selectată' : 'categorii selectate'}',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-              
+
               const SizedBox(height: 16),
-              
+
               // Continue Button
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
-                  onPressed: selectedCategories.isNotEmpty ? _continueToApp : null,
+                  onPressed: selectedCategories.isNotEmpty
+                      ? _continueToApp
+                      : null,
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -125,7 +130,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
                   child: Text(
-                    selectedCategories.isNotEmpty 
+                    selectedCategories.isNotEmpty
                         ? 'Începe să explorezi 🚀'
                         : 'Selectează cel puțin o categorie',
                     style: const TextStyle(
@@ -135,7 +140,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
               ),
-              
+
               // Skip Button
               const SizedBox(height: 12),
               SizedBox(
@@ -169,7 +174,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       itemBuilder: (context, index) {
         final category = categories[index];
         final isSelected = selectedCategories.contains(category.id);
-        
+
         return _buildCategoryCard(category, isSelected);
       },
     );
@@ -178,7 +183,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _buildCategoryCard(Category category, bool isSelected) {
     return Material(
       elevation: isSelected ? 8 : 2,
-      shadowColor: isSelected 
+      shadowColor: isSelected
           ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.3)
           : Colors.black.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(16),
@@ -190,9 +195,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected 
+              color: isSelected
                   ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  : Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.3),
               width: isSelected ? 2 : 1,
             ),
             color: isSelected
@@ -209,7 +216,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2)
                         : Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -219,7 +228,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Label
                 Text(
                   category.label,
@@ -233,7 +242,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                
+
                 // Checkmark
                 if (isSelected) ...[
                   const SizedBox(height: 8),
@@ -263,10 +272,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _continueToApp() async {
     // Save selected categories
-    await ref.read(onboardingProvider.notifier).completeOnboarding(
-      selectedCategories.toList(),
-    );
-    
+    await ref
+        .read(onboardingProvider.notifier)
+        .completeOnboarding(selectedCategories.toList());
+
     if (mounted) {
       context.go('/');
     }
@@ -275,7 +284,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Future<void> _skipOnboarding() async {
     // Complete onboarding without selecting categories
     await ref.read(onboardingProvider.notifier).completeOnboarding([]);
-    
+
     if (mounted) {
       context.go('/');
     }

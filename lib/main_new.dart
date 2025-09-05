@@ -54,8 +54,10 @@ class MyApp extends ConsumerWidget {
           builder: (context, state) => const OnboardingScreen(),
         ),
         ShellRoute(
-          builder: (context, state, child) =>
-              MainShell(location: state.uri.toString(), child: child),
+          builder: (context, state, child) => MainShell(
+            location: state.uri.toString(),
+            child: child,
+          ),
           routes: [
             GoRoute(
               path: '/home',
@@ -77,15 +79,15 @@ class MyApp extends ConsumerWidget {
               name: 'profile',
               builder: (context, state) => const ProfileScreen(),
             ),
-            GoRoute(
-              path: '/details/:id',
-              name: 'details',
-              builder: (context, state) {
-                final id = state.pathParameters['id']!;
-                return FactCheckDetailsScreen(factCheckId: id);
-              },
-            ),
           ],
+        ),
+        GoRoute(
+          path: '/details/:id',
+          name: 'details',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return FactCheckDetailsScreen(factCheckId: id);
+          },
         ),
       ],
     );
