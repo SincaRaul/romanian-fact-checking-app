@@ -99,4 +99,17 @@ class ApiFactCheckRepository implements FactCheckRepositoryInterface {
       return [];
     }
   }
+
+  @override
+  Future<FactCheck> generateWithAI({
+    required String question,
+    String? category,
+  }) async {
+    try {
+      return await _api.generateWithAI(question: question, category: category);
+    } catch (e) {
+      debugPrint('Error generating fact check with AI: $e');
+      rethrow; // Re-throw so UI can handle the error
+    }
+  }
 }

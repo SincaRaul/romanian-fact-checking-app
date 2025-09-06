@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/category.dart';
 import '../providers/category_providers.dart';
-import '../providers/fact_check_providers.dart';
 
 class AskScreen extends ConsumerStatefulWidget {
   const AskScreen({super.key});
@@ -351,7 +351,7 @@ class _AskScreenState extends ConsumerState<AskScreen> {
           '25 voturi',
           () {
             _questionController.text = 'România se califică la EURO 2024?';
-            setState(() => _selectedCategory = 'sports');
+            setState(() => _selectedCategory = 'football');
           },
         ),
         _buildPopularQuestionCard(
@@ -439,20 +439,16 @@ class _AskScreenState extends ConsumerState<AskScreen> {
     });
 
     try {
-      // Get the repository from provider
-      final repository = ref.read(factCheckRepoProvider);
+      // TODO: Implement API call to backend
+      // Pentru acum, simulez trimiterea
+      await Future.delayed(const Duration(seconds: 2));
 
-      // Generate fact-check using AI
-      final newFactCheck = await repository.generateWithAI(
-        question: _questionController.text.trim(),
-        category: _selectedCategory,
-      );
+      // TODO: Redirectez la pagina de detalii a fact-check-ului generat
 
       if (mounted) {
-        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✨ Verificarea a fost generată cu succes!'),
+            content: Text('Verificarea a fost generată cu succes!'),
             backgroundColor: Colors.green,
           ),
         );
@@ -462,17 +458,11 @@ class _AskScreenState extends ConsumerState<AskScreen> {
         setState(() {
           _selectedCategory = null;
         });
-
-        // Redirect to the fact-check details page
-        context.go('/details/${newFactCheck.id}');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('❌ Eroare: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Eroare: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
