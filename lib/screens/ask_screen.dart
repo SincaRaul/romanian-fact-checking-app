@@ -179,7 +179,7 @@ class _AskScreenState extends ConsumerState<AskScreen> {
         const SizedBox(height: 12),
         categoriesAsync.when(
           data: (categories) => DropdownButtonFormField<String>(
-            value: _selectedCategory,
+            initialValue: _selectedCategory,
             decoration: const InputDecoration(
               border: OutlineInputBorder(),
               prefixIcon: Icon(Icons.category),

@@ -532,7 +532,7 @@ class FactCheckDetailsScreen extends ConsumerWidget {
                     ],
                   ),
                 );
-              }).toList(),
+              }),
 
               const SizedBox(height: 16),
 

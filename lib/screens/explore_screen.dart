@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../models/fact_check.dart';
 import '../providers/fact_check_providers.dart';
 import '../utils/verdict_extensions.dart';
+import '../widgets/verdict_badge.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
   const ExploreScreen({super.key});
@@ -296,38 +297,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
               Row(
                 children: [
                   // Verdict Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: factCheck.verdict.color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: factCheck.verdict.color.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          factCheck.verdict.iconData,
-                          size: 14,
-                          color: factCheck.verdict.color,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          factCheck.verdict.displayName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: factCheck.verdict.color,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  VerdictBadge(factCheck: factCheck),
                   const Spacer(),
 
                   // Popularity Badge (doar pentru recente)
