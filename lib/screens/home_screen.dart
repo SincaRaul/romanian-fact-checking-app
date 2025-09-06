@@ -182,7 +182,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: () {
-          debugPrint('🔗 Navigating to: /details/${factCheck.id}');
           // Navighez cu query parameter pentru a ști de unde vin
           context.go('/details/${factCheck.id}?from=home');
         },

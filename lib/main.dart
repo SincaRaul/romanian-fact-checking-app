@@ -22,25 +22,16 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final onboardingState = ref.watch(onboardingProvider);
 
-    // Debug print
-    debugPrint('🔍 Onboarding state: $onboardingState');
-
     final router = GoRouter(
       initialLocation: '/home',
       redirect: (context, state) {
-        debugPrint(
-          '🔄 Redirect check: ${state.matchedLocation}, State: $onboardingState',
-        );
-
         // Simplified redirect logic
         if (onboardingState is OnboardingNotStarted) {
           if (state.matchedLocation != '/onboarding') {
-            debugPrint('➡️ Redirecting to onboarding');
             return '/onboarding';
           }
         } else if (onboardingState is OnboardingCompleted) {
           if (state.matchedLocation == '/onboarding') {
-            debugPrint('➡️ Redirecting to home');
             return '/home';
           }
         }
@@ -82,8 +73,6 @@ class MyApp extends ConsumerWidget {
               name: 'details',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
-                debugPrint('🎯 Details route accessed with ID: $id');
-                debugPrint('🌐 Full URI: ${state.uri}');
                 return FactCheckDetailsScreen(factCheckId: id);
               },
             ),

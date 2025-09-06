@@ -283,7 +283,6 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
       elevation: 2,
       child: InkWell(
         onTap: () {
-          debugPrint('🔗 Navigating to: /details/${factCheck.id}');
           // Navighez cu query parameter pentru a ști de unde vin
           context.go('/details/${factCheck.id}?from=explore');
         },
