@@ -8,4 +8,4 @@ alembic==1.13.2
 redis==5.0.7
 rq==1.16.2
 python-dateutil==2.9.0.post0
-google-generativeai==0.3.2
+google-genai

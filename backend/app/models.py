@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, Text, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.db import Base
@@ -23,6 +23,7 @@ class Check(Base):
     confidence = Column(Integer, default=0)
     summary = Column(Text, nullable=True)
     category = Column(String(50), nullable=True)  # football|politics_internal|politics_external|bills|health|tech|other
+    sources = Column(JSON, nullable=True)  # array de surse în format JSON
     auto_generated = Column(Boolean, default=True)
     status = Column(String(16), default="draft") # draft|published
     published_at = Column(DateTime, nullable=True)

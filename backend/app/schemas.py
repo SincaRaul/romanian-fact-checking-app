@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 class QuestionCreate(BaseModel):
     title: str = Field(min_length=5, max_length=280)
@@ -30,8 +30,24 @@ class CheckOut(BaseModel):
     confidence: int
     summary: Optional[str]
     category: Optional[str]
+    sources: Optional[List[str]]
     auto_generated: bool
     published_at: Optional[datetime]
 
     class Config:
         from_attributes = True
+
+class GenerateCheckRequest(BaseModel):
+    question: str = Field(min_length=10, max_length=500, description="The question/claim to fact-check")
+    category: Optional[str] = Field(None, description="Optional category hint for the AI")
+
+class GenerateCheckResponse(BaseModel):
+    id: str
+    title: str
+    verdict: str
+    confidence: int
+    summary: str
+    category: str
+    auto_generated: bool = True
+    created_at: datetime
+    sources: Optional[List[str]] = None
