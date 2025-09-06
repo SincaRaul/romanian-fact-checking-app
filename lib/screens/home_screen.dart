@@ -181,7 +181,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: InkWell(
-        onTap: () => context.push('/details/${factCheck.id}'),
+        onTap: () {
+          debugPrint('🔗 Navigating to: /details/${factCheck.id}');
+          // Navighez cu query parameter pentru a ști de unde vin
+          context.go('/details/${factCheck.id}?from=home');
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

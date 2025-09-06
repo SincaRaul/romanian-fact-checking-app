@@ -282,7 +282,11 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
     return Card(
       elevation: 2,
       child: InkWell(
-        onTap: () => context.push('/details/${factCheck.id}'),
+        onTap: () {
+          debugPrint('🔗 Navigating to: /details/${factCheck.id}');
+          // Navighez cu query parameter pentru a ști de unde vin
+          context.go('/details/${factCheck.id}?from=explore');
+        },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),

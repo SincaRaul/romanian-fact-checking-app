@@ -13,11 +13,28 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _calculateSelectedIndex(String location) {
-    if (location.startsWith('/home')) return 0;
-    if (location.startsWith('/explore')) return 1;
-    if (location.startsWith('/ask')) return 2;
-    if (location.startsWith('/profile')) return 3;
-    return 0;
+    // Parsez URI-ul pentru a obține parametrii
+    final uri = Uri.parse(location);
+
+    // Verific path-ul principal
+    if (uri.path.startsWith('/home')) return 0;
+    if (uri.path.startsWith('/explore')) return 1;
+    if (uri.path.startsWith('/ask')) return 2;
+    if (uri.path.startsWith('/profile')) return 3;
+
+    // Pentru pagina de detalii, verific parametrul 'from'
+    if (uri.path.startsWith('/details')) {
+      final fromPage = uri.queryParameters['from'] ?? 'home';
+      switch (fromPage) {
+        case 'explore':
+          return 1; // Tab Explore
+        case 'home':
+        default:
+          return 0; // Tab Home
+      }
+    }
+
+    return 0; // Default la Home
   }
 
   void _onDestinationSelected(int index) {

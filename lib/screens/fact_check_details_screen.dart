@@ -14,12 +14,27 @@ class FactCheckDetailsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final factCheckAsync = ref.watch(factCheckByIdProvider(factCheckId));
 
+    // Obțin parametrul 'from' pentru a ști unde să mă întorc
+    final uri = GoRouterState.of(context).uri;
+    final fromPage = uri.queryParameters['from'] ?? 'home';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalii Fact-Check'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // Mă întorc la pagina de unde am venit
+            switch (fromPage) {
+              case 'explore':
+                context.go('/explore');
+                break;
+              case 'home':
+              default:
+                context.go('/home');
+                break;
+            }
+          },
         ),
       ),
       body: factCheckAsync.when(

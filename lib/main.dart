@@ -82,6 +82,8 @@ class MyApp extends ConsumerWidget {
               name: 'details',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
+                debugPrint('🎯 Details route accessed with ID: $id');
+                debugPrint('🌐 Full URI: ${state.uri}');
                 return FactCheckDetailsScreen(factCheckId: id);
               },
             ),
