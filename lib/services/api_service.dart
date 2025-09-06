@@ -2,7 +2,17 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:8000';
+  // Auto-detect environment
+  static String get baseUrl {
+    if (kIsWeb) {
+      // In production, this will be your Railway URL
+      // For now, we'll use localhost for development
+      const prodUrl = String.fromEnvironment('API_URL', 
+          defaultValue: 'http://localhost:8000');
+      return prodUrl;
+    }
+    return 'http://localhost:8000';
+  }
 
   late final Dio _dio;
 
