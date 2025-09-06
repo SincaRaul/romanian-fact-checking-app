@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/fact_check.dart';
 import '../providers/fact_check_providers.dart';
 import '../utils/verdict_extensions.dart';
@@ -10,6 +11,48 @@ class FactCheckDetailsScreen extends ConsumerWidget {
   final String factCheckId;
 
   const FactCheckDetailsScreen({super.key, required this.factCheckId});
+
+  Future<void> _shareFactCheck(FactCheck factCheck) async {
+    final verdict = factCheck.verdict.displayName;
+    final confidence = factCheck.confidence;
+    
+    String shareText = '''
+📋 Fact-Check: ${factCheck.title}
+
+🔍 Verdict: $verdict (${confidence}% încredere)
+
+📝 Rezumat:
+${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
+
+📊 Categorie: ${factCheck.category ?? 'Necategorisit'}
+''';
+
+    final sources = factCheck.sources;
+    if (sources != null && sources.isNotEmpty) {
+      shareText += '\n🔗 Surse verificate:\n';
+      for (int i = 0; i < sources.length && i < 3; i++) {
+        final source = sources[i];
+        final sourceName = source.split(' - ').first;
+        shareText += '• $sourceName\n';
+      }
+      
+      if (sources.length > 3) {
+        shareText += '• ... și alte ${sources.length - 3} surse verificate\n';
+      }
+    }
+
+    shareText += '\n📱 Verificare independentă - FactCheck România';
+
+    // TODO: When deployed, add link to fact-check:
+    // shareText += '\n\n🔗 Vezi detalii complete: https://factcheck.ro/check/${factCheck.id}';
+
+    try {
+      await Share.share(shareText, subject: 'Fact-Check: ${factCheck.title}');
+    } catch (e) {
+      // Handle error silently or show a snackbar
+      debugPrint('Error sharing: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -370,14 +413,7 @@ class FactCheckDetailsScreen extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton.icon(
-          onPressed: () {
-            // TODO: Implement share functionality
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Funcția de share va fi implementată'),
-              ),
-            );
-          },
+          onPressed: () => _shareFactCheck(factCheck),
           icon: const Icon(Icons.share),
           label: const Text('Distribuie fact-check-ul'),
           style: ElevatedButton.styleFrom(

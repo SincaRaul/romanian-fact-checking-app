@@ -24,3 +24,7 @@ app.include_router(admin.router)
 @app.get("/")
 def root():
     return {"ok": True}
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "factcheck-api"}
