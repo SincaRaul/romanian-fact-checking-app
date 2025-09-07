@@ -4,14 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 // Provider pentru categorii disponibile
 final categoriesProvider = StateProvider<List<Map<String, String>>>((ref) {
   return [
-    {'key': 'politics', 'label': 'Politică'},
+    {'key': 'football', 'label': 'Fotbal'},
+    {'key': 'politics_internal', 'label': 'Politică Internă'},
+    {'key': 'politics_external', 'label': 'Politică Externă'},
     {'key': 'health', 'label': 'Sănătate'},
-    {'key': 'sports', 'label': 'Sport'},
-    {'key': 'international', 'label': 'Internațional'},
-    {'key': 'economy', 'label': 'Economie'},
     {'key': 'technology', 'label': 'Tehnologie'},
     {'key': 'environment', 'label': 'Mediu'},
-    {'key': 'social', 'label': 'Social'},
+    {'key': 'economy', 'label': 'Economie'},
+    {'key': 'bills', 'label': 'Facturi și Utilități'},
+    {'key': 'other', 'label': 'Altele'},
   ];
 });
 

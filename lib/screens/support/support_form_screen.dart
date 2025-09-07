@@ -159,7 +159,9 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
             filled: widget.factCheckId != null,
             fillColor: widget.factCheckId != null
-                ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5)
+                ? theme.colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.5,
+                  )
                 : null,
           ),
           validator: (value) {

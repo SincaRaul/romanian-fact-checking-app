@@ -165,12 +165,82 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
                 fc.title.toLowerCase().contains(lowerSearchTerm) ||
                 (fc.summary?.toLowerCase().contains(lowerSearchTerm) ??
                     false) ||
-                (fc.category?.toLowerCase().contains(lowerSearchTerm) ?? false),
+                (fc.category?.toLowerCase().contains(lowerSearchTerm) ?? false) ||
+                _matchesCategoryInRomanian(fc.category, lowerSearchTerm),
           )
           .toList();
     }
 
     return filtered;
+  }
+
+  // Funcție pentru a verifica dacă termenul de căutare se potrivește cu categoria în română
+  bool _matchesCategoryInRomanian(String? category, String searchTerm) {
+    if (category == null) return false;
+    
+    // Map categorii engleza -> termeni romana (inclusiv variante cu/fără diacritice și sinonime)
+    final categoryMapping = {
+      'environment': [
+        'mediu', 'natura', 'natură', 'natural', 'naturala', 'naturală',
+        'ecologie', 'ecologic', 'verde', 'climat', 'climatic', 'climatica', 'climatică',
+        'padure', 'pădure', 'animal', 'animale', 'planta', 'plantă', 'plante'
+      ],
+      'health': [
+        'sanatate', 'sănătate', 'sanatos', 'sănătos', 'medical', 'medicina', 'medicină',
+        'doctor', 'medic', 'spital', 'tratament', 'boala', 'boală', 'boli'
+      ],
+      'football': [
+        'fotbal', 'sport', 'sportiv', 'minge', 'echipa', 'echipă', 'joc', 'meci',
+        'stadion', 'gol', 'goluri', 'campionat', 'liga'
+      ],
+      'politics_internal': [
+        'politica', 'politică', 'intern', 'interna', 'internă', 'domestic', 'domestica', 'domestică',
+        'guvern', 'parlament', 'minister', 'presedinte', 'președinte', 'primar'
+      ],
+      'politics_external': [
+        'politica', 'politică', 'extern', 'externa', 'externă', 'international', 'internațional',
+        'strainatate', 'străinătate', 'europa', 'america', 'asia', 'diplomatie', 'diplomație'
+      ],
+      'technology': [
+        'tehnologie', 'tehnologic', 'tehnologica', 'tehnologică', 'tech', 'tehnologie',
+        'calculator', 'computer', 'digital', 'internet', 'aplicatie', 'aplicație', 'software'
+      ],
+      'economy': [
+        'economie', 'economic', 'economica', 'economică', 'financiar', 'financiara', 'financiară',
+        'bani', 'euro', 'leu', 'lei', 'crestere', 'creștere', 'inflatie', 'inflație'
+      ],
+      'bills': [
+        'facturi', 'factura', 'factură', 'utilitati', 'utilități', 'plata', 'plată',
+        'curent', 'apa', 'apă', 'gaz', 'caldura', 'căldură', 'energie'
+      ],
+      'other': [
+        'altele', 'alte', 'divers', 'diverse', 'general', 'generala', 'generală',
+        'variat', 'variata', 'variată', 'miscellaneous'
+      ],
+    };
+    
+    final romanianTerms = categoryMapping[category] ?? [];
+    return romanianTerms.any((term) => 
+      term.contains(searchTerm) || 
+      searchTerm.contains(term) ||
+      _removeDiacritics(term).contains(_removeDiacritics(searchTerm)) ||
+      _removeDiacritics(searchTerm).contains(_removeDiacritics(term))
+    );
+  }
+
+  // Funcție helper pentru a elimina diacriticele
+  String _removeDiacritics(String text) {
+    return text
+        .replaceAll('ă', 'a')
+        .replaceAll('â', 'a')
+        .replaceAll('î', 'i')
+        .replaceAll('ș', 's')
+        .replaceAll('ț', 't')
+        .replaceAll('Ă', 'A')
+        .replaceAll('Â', 'A')
+        .replaceAll('Î', 'I')
+        .replaceAll('Ș', 'S')
+        .replaceAll('Ț', 'T');
   }
 
   Widget _buildEmptyState(BuildContext context) {

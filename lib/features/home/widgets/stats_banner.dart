@@ -27,7 +27,7 @@ class StatsBanner extends StatelessWidget {
 
     return Card(
       elevation: 0,
-      color: colorScheme.primaryContainer.withOpacity(0.4),
+      color: colorScheme.primaryContainer.withValues(alpha: 0.4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -118,7 +118,7 @@ class StatsBanner extends StatelessWidget {
       showSelectedIcon: false,
       onSelectionChanged: (selection) => onTimeframeChanged(selection.first),
       style: SegmentedButton.styleFrom(
-        backgroundColor: colorScheme.surface.withOpacity(0.8),
+        backgroundColor: colorScheme.surface.withValues(alpha: 0.8),
         selectedBackgroundColor: colorScheme.primary,
         selectedForegroundColor: colorScheme.onPrimary,
         foregroundColor: colorScheme.onSurface,
@@ -164,7 +164,7 @@ class StatsBanner extends StatelessWidget {
           child: LinearProgressIndicator(
             value: value.clamp(0.0, 1.0),
             minHeight: 8,
-            backgroundColor: colorScheme.surface.withOpacity(0.6),
+            backgroundColor: colorScheme.surface.withValues(alpha: 0.6),
             valueColor: AlwaysStoppedAnimation<Color>(color),
           ),
         ),
