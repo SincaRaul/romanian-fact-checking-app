@@ -15,11 +15,12 @@ class FactCheckDetailsScreen extends ConsumerWidget {
   Future<void> _shareFactCheck(FactCheck factCheck) async {
     final verdict = factCheck.verdict.displayName;
     final confidence = factCheck.confidence;
-    
-    String shareText = '''
+
+    String shareText =
+        '''
 📋 Fact-Check: ${factCheck.title}
 
-🔍 Verdict: $verdict (${confidence}% încredere)
+🔍 Verdict: $verdict ($confidence% încredere)
 
 📝 Rezumat:
 ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
@@ -35,7 +36,7 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
         final sourceName = source.split(' - ').first;
         shareText += '• $sourceName\n';
       }
-      
+
       if (sources.length > 3) {
         shareText += '• ... și alte ${sources.length - 3} surse verificate\n';
       }

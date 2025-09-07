@@ -1,0 +1,336 @@
+// lib/features/home/new_home_screen.dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../models/fact_check.dart';
+import '../../providers/fact_check_providers.dart';
+import '../filters/category_providers.dart';
+import '../filters/filter_strip.dart';
+import 'home_providers.dart';
+import 'widgets/home_header.dart';
+import 'widgets/stats_banner.dart';
+import 'widgets/fact_check_card.dart';
+
+class NewHomeScreen extends ConsumerStatefulWidget {
+  const NewHomeScreen({super.key});
+
+  @override
+  ConsumerState<NewHomeScreen> createState() => _NewHomeScreenState();
+}
+
+class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
+  String _searchTerm = '';
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncChecks = ref.watch(personalizedFactChecksProvider);
+    final categories = ref.watch(categoriesProvider);
+    final selectedCategory = ref.watch(selectedCategoryProvider);
+    final sortType = ref.watch(sortTypeProvider);
+    final timeframe = ref.watch(timeframeProvider);
+    final stats = ref.watch(statsProvider);
+
+    return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push('/ask'),
+        label: const Text('Întreabă'),
+        icon: const Icon(Icons.add_comment),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(personalizedFactChecksProvider);
+          },
+          child: CustomScrollView(
+            slivers: [
+              // Header
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  child: HomeHeader(
+                    onSearchChanged: (term) {
+                      setState(() {
+                        _searchTerm = term;
+                      });
+                    },
+                  ),
+                ),
+              ),
+
+              // Stats Banner
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: StatsBanner(
+                    newCount: stats['newCount'] ?? 0,
+                    truePct: stats['truePct'] ?? 0,
+                    falsePct: stats['falsePct'] ?? 0,
+                    timeframe: timeframe,
+                    onTimeframeChanged: (newTimeframe) {
+                      ref.read(timeframeProvider.notifier).state = newTimeframe;
+                    },
+                    onViewAll: () => context.push('/explore'),
+                  ),
+                ),
+              ),
+
+              // Filter Strip
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                  child: FilterStrip(
+                    categories: categories,
+                    selectedKey: selectedCategory,
+                    onCategory: (key) {
+                      ref.read(selectedCategoryProvider.notifier).state = key;
+                    },
+                    sort: sortType,
+                    onSort: (newSort) {
+                      ref.read(sortTypeProvider.notifier).state = newSort;
+                    },
+                  ),
+                ),
+              ),
+
+              // Fact Checks List
+              asyncChecks.when(
+                data: (factChecks) {
+                  final filteredChecks = _filterFactChecks(
+                    factChecks,
+                    selectedCategory,
+                    _searchTerm,
+                  );
+
+                  if (filteredChecks.isEmpty) {
+                    return SliverFillRemaining(
+                      child: _buildEmptyState(context),
+                    );
+                  }
+
+                  return SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    sliver: SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
+                        final factCheck = filteredChecks[index];
+                        return FactCheckCard(
+                          factCheck: factCheck,
+                          onTap: () =>
+                              context.push('/fact-check/${factCheck.id}'),
+                        );
+                      }, childCount: filteredChecks.length),
+                    ),
+                  );
+                },
+                loading: () => SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _buildSkeletonCard(context),
+                      childCount: 5,
+                    ),
+                  ),
+                ),
+                error: (error, stack) => SliverFillRemaining(
+                  child: _buildErrorState(context, error.toString()),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<FactCheck> _filterFactChecks(
+    List<FactCheck> factChecks,
+    String? selectedCategory,
+    String searchTerm,
+  ) {
+    var filtered = factChecks;
+
+    // Filter by category
+    if (selectedCategory != null) {
+      filtered = filtered
+          .where((fc) => fc.category == selectedCategory)
+          .toList();
+    }
+
+    // Filter by search term
+    if (searchTerm.isNotEmpty) {
+      final lowerSearchTerm = searchTerm.toLowerCase();
+      filtered = filtered
+          .where(
+            (fc) =>
+                fc.title.toLowerCase().contains(lowerSearchTerm) ||
+                (fc.summary?.toLowerCase().contains(lowerSearchTerm) ??
+                    false) ||
+                (fc.category?.toLowerCase().contains(lowerSearchTerm) ?? false),
+          )
+          .toList();
+    }
+
+    return filtered;
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nu am găsit verificări',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Încearcă să modifici filtrele sau să cauți altceva.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.push('/ask'),
+              icon: const Icon(Icons.add_comment),
+              label: const Text('Pune o întrebare'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(BuildContext context, String error) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: colorScheme.error),
+            const SizedBox(height: 16),
+            Text(
+              'A apărut o eroare',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () {
+                ref.invalidate(personalizedFactChecksProvider);
+              },
+              icon: const Icon(Icons.refresh),
+              label: const Text('Încearcă din nou'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonCard(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.symmetric(vertical: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outlineVariant),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Leading pill skeleton
+            Container(
+              width: 8,
+              height: 60,
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title skeleton
+                  Container(
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    height: 20,
+                    width: 200,
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Metadata skeleton
+                  Row(
+                    children: [
+                      Container(
+                        height: 16,
+                        width: 60,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        height: 16,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: colorScheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

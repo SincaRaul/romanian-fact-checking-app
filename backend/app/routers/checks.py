@@ -121,3 +121,44 @@ async def generate_fact_check(
             status_code=500, 
             detail=f"Eroare la generarea fact-check-ului: {str(e)}"
         )
+
+@router.post("/test-models")
+async def test_different_models(request: schemas.GenerateCheckRequest):
+    """Test different Gemini models for comparison"""
+    try:
+        from app.services.gemini_service import GeminiService
+        
+        # Test with different models
+        models_to_test = [
+            "gemini-2.0-flash-exp",
+            "gemini-2.0-flash-thinking-exp", 
+            "gemini-1.5-flash",
+            "gemini-1.5-pro"
+        ]
+        
+        results = {}
+        
+        for model_name in models_to_test:
+            try:
+                service = GeminiService(model_name=model_name)
+                result = await service.generate_fact_check(request.question)
+                results[model_name] = {
+                    "success": True,
+                    "result": result
+                }
+            except Exception as model_error:
+                results[model_name] = {
+                    "success": False,
+                    "error": str(model_error)
+                }
+        
+        return {
+            "question": request.question,
+            "models_tested": results
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Error testing models: {str(e)}"
+        )

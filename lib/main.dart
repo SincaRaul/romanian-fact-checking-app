@@ -5,10 +5,11 @@ import 'providers/onboarding_providers.dart';
 import 'screens/fact_check_details_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/main_shell.dart';
-import 'screens/home_screen.dart';
 import 'screens/explore_screen.dart';
 import 'screens/ask_screen.dart';
 import 'screens/profile_screen.dart';
+import 'features/home/new_home_screen.dart';
+import 'features/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +52,7 @@ class MyApp extends ConsumerWidget {
             GoRoute(
               path: '/home',
               name: 'home',
-              builder: (context, state) => const HomeScreen(),
+              builder: (context, state) => const NewHomeScreen(),
             ),
             GoRoute(
               path: '/explore',
@@ -85,10 +86,8 @@ class MyApp extends ConsumerWidget {
       title: 'Fact Check România',
       debugShowCheckedModeBanner: false,
       routerConfig: router,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       builder: (context, child) {
         // Show loading screen while checking onboarding status
         return switch (onboardingState) {

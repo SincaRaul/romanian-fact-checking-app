@@ -17,6 +17,20 @@ class QuestionOut(BaseModel):
     class Config:
         from_attributes = True
 
+class SupportTicketCreate(BaseModel):
+    category: str
+    description: str = Field(min_length=10)
+    sourceUrl: Optional[str] = None
+    userEmail: Optional[str] = None
+
+class SupportTicketResponse(BaseModel):
+    id: str
+    category: str
+    description: str
+    sourceUrl: Optional[str]
+    userEmail: Optional[str]
+    createdAt: datetime
+
 class VoteOut(BaseModel):
     question_id: str
     votes_count: int

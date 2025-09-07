@@ -57,7 +57,7 @@ class FactChecksApi {
     String? category,
   }) async {
     try {
-      final response = await _apiService.dio.post(
+      final response = await _apiService.postWithExtendedTimeout(
         '/generate',
         data: {
           'question': question,

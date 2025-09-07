@@ -1,4 +1,5 @@
 import json
+import asyncio
 from typing import Dict, Any
 from google import genai
 from google.genai import types
@@ -9,15 +10,30 @@ class GeminiService:
         # Configure the new Gemini client with API key
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         
-        # Define the grounding tool for Google Search
+        # Define the grounding tool for Google Search with timeout
         self.grounding_tool = types.Tool(
             google_search=types.GoogleSearch()
         )
         
-        # Configure generation settings with grounding
+        # Configure generation settings with grounding and timeouts
         self.config = types.GenerateContentConfig(
-            tools=[self.grounding_tool]
+            tools=[self.grounding_tool],
+            # Add timeout and other safety settings
+            safety_settings=[
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+                ),
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                    threshold=types.HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
+                )
+            ]
         )
+        
+        # Timeout settings (in seconds) - optimized for Gemini 2.5 Pro
+        self.request_timeout = 90  # Maximum 90 seconds for each request (Pro models can be slower)
+        self.search_timeout = 45   # Maximum 45 seconds for search grounding
 
     async def categorize_fact_check(self, title: str, summary: str = None) -> Dict[str, Any]:
         """
@@ -56,7 +72,16 @@ Răspunde DOAR cu un JSON în această formă:
 """
 
         try:
-            response = self.model.generate_content(prompt)
+            # Use the client with timeout for categorization
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    self.client.models.generate_content,
+                    model="gemini-2.5-pro",
+                    contents=prompt,
+                    config=types.GenerateContentConfig()  # No grounding needed for categorization
+                ),
+                timeout=self.search_timeout  # Shorter timeout for categorization
+            )
             result_text = response.text.strip()
             
             # Try to parse JSON response
@@ -93,7 +118,7 @@ Răspunde DOAR cu un JSON în această formă:
 
     async def generate_fact_check(self, claim: str) -> Dict[str, Any]:
         """
-        Generate a complete fact-check using Gemini 2.0 Flash with Google Search Grounding
+        Generate a complete fact-check using  Google Search Grounding
         Returns: {"verdict": "true", "confidence": 85, "summary": "...", "category": "...", "sources": [...]}
         """
         
@@ -122,22 +147,32 @@ Răspunde DOAR cu un JSON în această formă EXACTĂ:
     ]
 }}
 
-VERDICTS:
-- true: complet adevărat conform surselor
-- false: complet fals conform surselor  
-- mixed: parțial adevărat/fals
-- unclear: informații insuficiente
+VERDICTS - ALEGE CU ATENȚIE:
+- true: afirmația este COMPLET ADEVĂRATĂ conform tuturor surselor verificate
+- false: afirmația este COMPLET FALSĂ conform tuturor surselor verificate
+- mixed: afirmația este PARȚIAL ADEVĂRATĂ (unele părți corecte, altele false)
+- unclear: informații contradictorii sau insuficiente pentru un verdict clar
+
+EXEMPLE DE VERDICTS:
+- "România este în UE" → true (complet adevărat)
+- "Copiii pot conduce la 14 ani în România" → false (complet fals)
+- "România exportă gaze în unele luni dar importă în altele" → mixed (situația variază)
+- "Există viață pe Marte" → unclear (nu avem certitudine)
 
 CONFIDENCE: 0-100 (cât de sigur ești bazat pe sursele găsite)
 SOURCES: Array cu 2-4 surse în format "Titlu - URL"
 """
 
         try:
-            # Generate content with Google Search grounding using Gemini 2.0 Flash
-            response = self.client.models.generate_content(
-                model="gemini-2.0-flash-exp",
-                contents=prompt,
-                config=self.config
+            # Generate content with Google Search grounding using Gemini 2.5 Pro with timeout
+            response = await asyncio.wait_for(
+                asyncio.to_thread(
+                    self.client.models.generate_content,
+                    model="gemini-2.5-pro",
+                    contents=prompt,
+                    config=self.config
+                ),
+                timeout=self.request_timeout
             )
             
             # Extract the main result
@@ -156,10 +191,10 @@ SOURCES: Array cu 2-4 surse în format "Titlu - URL"
                 if hasattr(candidate, 'grounding_metadata') and candidate.grounding_metadata:
                     metadata = candidate.grounding_metadata
                     
-                    # Extract grounding chunks (web sources)
-                    if hasattr(metadata, 'grounding_chunks'):
+                    # Extract grounding chunks (web sources) with null safety
+                    if hasattr(metadata, 'grounding_chunks') and metadata.grounding_chunks:
                         for chunk in metadata.grounding_chunks:
-                            if hasattr(chunk, 'web'):
+                            if hasattr(chunk, 'web') and chunk.web:
                                 title = chunk.web.title if hasattr(chunk.web, 'title') else "Sursă web"
                                 uri = chunk.web.uri if hasattr(chunk.web, 'uri') else ""
                                 if uri:
@@ -177,6 +212,20 @@ SOURCES: Array cu 2-4 surse în format "Titlu - URL"
             
             return result
             
+        except asyncio.TimeoutError:
+            print(f"Timeout error in Gemini fact-check generation after {self.request_timeout}s")
+            # Return fallback result for timeout
+            return {
+                "verdict": "unclear",
+                "confidence": 15,
+                "summary": f"Nu am putut verifica această afirmație în timp util (timeout după {self.request_timeout} secunde). Verificarea automată a durat prea mult.",
+                "category": "other",
+                "sources": [
+                    "Timeout în verificarea automată - durată prea lungă",
+                    "Pentru informații verificate accesați presa de încredere",
+                    "Încercați din nou sau consultați surse manuale"
+                ]
+            }
         except Exception as e:
             print(f"Error in Gemini fact-check generation: {e}")
             # Return fallback result

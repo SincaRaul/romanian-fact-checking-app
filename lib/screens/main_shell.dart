@@ -19,8 +19,7 @@ class _MainShellState extends State<MainShell> {
     // Verific path-ul principal
     if (uri.path.startsWith('/home')) return 0;
     if (uri.path.startsWith('/explore')) return 1;
-    if (uri.path.startsWith('/ask')) return 2;
-    if (uri.path.startsWith('/profile')) return 3;
+    if (uri.path.startsWith('/profile')) return 2;
 
     // Pentru pagina de detalii, verific parametrul 'from'
     if (uri.path.startsWith('/details')) {
@@ -46,9 +45,6 @@ class _MainShellState extends State<MainShell> {
         context.go('/explore');
         break;
       case 2:
-        context.go('/ask');
-        break;
-      case 3:
         context.go('/profile');
         break;
     }
@@ -71,11 +67,6 @@ class _MainShellState extends State<MainShell> {
             icon: Icon(Icons.explore_outlined),
             selectedIcon: Icon(Icons.explore),
             label: 'Explorează',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.add_comment_outlined),
-            selectedIcon: Icon(Icons.add_comment),
-            label: 'Întreabă',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),

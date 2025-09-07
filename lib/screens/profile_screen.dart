@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../providers/onboarding_providers.dart';
 import '../providers/category_providers.dart';
 import '../models/category.dart';
+import 'support/support_category_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -177,16 +178,6 @@ class ProfileScreen extends ConsumerWidget {
                 title: 'Întrebări',
                 value: '3',
                 subtitle: 'trimise',
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.trending_up,
-                title: 'Precizie',
-                value: '85%',
-                subtitle: 'medie',
               ),
             ),
           ],
@@ -379,31 +370,10 @@ class ProfileScreen extends ConsumerWidget {
         const SizedBox(height: 12),
         _buildSettingsItem(
           context,
-          icon: Icons.notifications,
-          title: 'Notificări',
-          subtitle: 'Gestionează notificările pentru fact-check-uri noi',
-          onTap: () => _showComingSoonSnackBar(context),
-        ),
-        _buildSettingsItem(
-          context,
-          icon: Icons.language,
-          title: 'Limbă',
-          subtitle: 'Română',
-          onTap: () => _showComingSoonSnackBar(context),
-        ),
-        _buildSettingsItem(
-          context,
           icon: Icons.dark_mode,
           title: 'Temă',
           subtitle: 'Sistem (Auto)',
           onTap: () => _showComingSoonSnackBar(context),
-        ),
-        _buildSettingsItem(
-          context,
-          icon: Icons.storage,
-          title: 'Date salvate',
-          subtitle: 'Gestionează cache-ul local',
-          onTap: () => _showClearCacheDialog(context, ref),
         ),
       ],
     );
@@ -445,24 +415,10 @@ class ProfileScreen extends ConsumerWidget {
         ),
         _buildSettingsItem(
           context,
-          icon: Icons.privacy_tip,
-          title: 'Politica de confidențialitate',
-          subtitle: 'Cum folosim datele tale',
-          onTap: () => _showComingSoonSnackBar(context),
-        ),
-        _buildSettingsItem(
-          context,
-          icon: Icons.description,
-          title: 'Termeni și condiții',
-          subtitle: 'Citește termenii de utilizare',
-          onTap: () => _showComingSoonSnackBar(context),
-        ),
-        _buildSettingsItem(
-          context,
           icon: Icons.help,
           title: 'Ajutor și suport',
           subtitle: 'Contactează echipa noastră',
-          onTap: () => _showComingSoonSnackBar(context),
+          onTap: () => _showSupportDialog(context),
         ),
       ],
     );
@@ -505,31 +461,9 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showClearCacheDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Șterge cache-ul'),
-        content: const Text(
-          'Această acțiune va șterge toate datele temporare salvate local. Aplicația va reîncărca datele de la server.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Anulează'),
-          ),
-          FilledButton(
-            onPressed: () {
-              // Clear cache logic
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Cache-ul a fost șters')),
-              );
-            },
-            child: const Text('Șterge'),
-          ),
-        ],
-      ),
+  void _showSupportDialog(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (context) => const SupportCategoryScreen()),
     );
   }
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.settings import cors_origins_list
 from app.db import Base, engine
-from app.routers import questions, checks, admin
+from app.routers import questions, checks, admin, support
 
 # Creează tabelele la pornire (MVP). Pentru producție -> Alembic.
 Base.metadata.create_all(bind=engine)
@@ -20,6 +20,7 @@ app.add_middleware(
 app.include_router(questions.router)
 app.include_router(checks.router)
 app.include_router(admin.router)
+app.include_router(support.router)
 
 @app.get("/")
 def root():

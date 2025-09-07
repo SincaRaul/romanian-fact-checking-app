@@ -1,0 +1,32 @@
+[
+  {
+    "id": "test456",
+    "category": "featureRequest",
+    "description": "test feature request",
+    "createdAt": "2025-09-07T08:05:23.543867"
+  },
+  {
+    "id": "1757232484021",
+    "category": "featureRequest",
+    "description": "Please add popcorn to this app!",
+    "sourceUrl": null,
+    "createdAt": "2025-09-07T11:08:04.021",
+    "userEmail": "popcornlover22@gmail.com"
+  },
+  {
+    "id": "1757232773448",
+    "category": "featureRequest",
+    "description": "I want a new feature!",
+    "sourceUrl": null,
+    "createdAt": "2025-09-07T11:12:53.448",
+    "userEmail": "featurelover@yahoo.com"
+  },
+  {
+    "id": "1757233043221",
+    "category": "featureRequest",
+    "description": "I love features so much",
+    "sourceUrl": null,
+    "createdAt": "2025-09-07T11:17:23.221",
+    "userEmail": null
+  }
+]
