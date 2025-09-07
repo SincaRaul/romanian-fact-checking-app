@@ -6,7 +6,7 @@ class FactCheckRepository implements FactCheckRepositoryInterface {
   final _rnd = Random();
 
   @override
-  Future<List<FactCheck>> getLatest() async {
+  Future<List<FactCheck>> getLatest({int limit = 20}) async {
     await Future.delayed(const Duration(milliseconds: 250));
     final v = [Verdict.true_, Verdict.false_, Verdict.mixed, Verdict.unclear];
 

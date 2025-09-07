@@ -449,6 +449,10 @@ class _AskScreenState extends ConsumerState<AskScreen> {
       );
 
       if (mounted) {
+        // Invalidate main providers - others will refresh automatically due to dependencies
+        ref.invalidate(latestFactChecksProvider);
+        ref.invalidate(personalizedFactChecksProvider);
+        
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

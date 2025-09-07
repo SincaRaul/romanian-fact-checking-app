@@ -1,7 +1,7 @@
 import '../models/fact_check.dart';
 
 abstract class FactCheckRepositoryInterface {
-  Future<List<FactCheck>> getLatest();
+  Future<List<FactCheck>> getLatest({int limit = 20});
   Future<FactCheck?> getById(String id);
   Future<List<FactCheck>> searchFactChecks(String query);
   Future<List<FactCheck>> getByVerdict(Verdict verdict);

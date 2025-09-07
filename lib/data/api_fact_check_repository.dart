@@ -11,9 +11,9 @@ class ApiFactCheckRepository implements FactCheckRepositoryInterface {
     : _api = FactChecksApi(apiService);
 
   @override
-  Future<List<FactCheck>> getLatest() async {
+  Future<List<FactCheck>> getLatest({int limit = 20}) async {
     try {
-      return await _api.getLatest();
+      return await _api.getLatest(limit: limit);
     } catch (e) {
       // Fallback to empty list on error for better UX
       debugPrint('Error fetching fact checks: $e');
