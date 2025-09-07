@@ -9,3 +9,4 @@ redis==5.0.7
 rq==1.16.2
 python-dateutil==2.9.0.post0
 google-genai
+pyjwt==2.8.0

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   // Auto-detect environment
@@ -17,6 +18,7 @@ class ApiService {
   }
 
   late final Dio _dio;
+  static const _secureStorage = FlutterSecureStorage();
 
   ApiService() {
     _dio = Dio(
@@ -28,6 +30,22 @@ class ApiService {
         ), // Increased for Gemini 2.5 Pro
         sendTimeout: const Duration(seconds: 30),
         headers: {'Content-Type': 'application/json'},
+      ),
+    );
+
+    // Add admin auth interceptor
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          // Add admin token to requests to /admin endpoints
+          if (options.path.startsWith('/admin')) {
+            final token = await _secureStorage.read(key: 'admin_token');
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
+          }
+          handler.next(options);
+        },
       ),
     );
 
@@ -65,5 +83,16 @@ class ApiService {
         sendTimeout: const Duration(seconds: 60),
       ),
     );
+  }
+
+  // Create a new fact-check (admin endpoint)
+  Future<Response> createAdminFactCheck(Map<String, dynamic> factCheckData) {
+    return post('/admin/fact-checks', data: factCheckData);
+  }
+
+  // Legacy method for backward compatibility
+  static Future<Response> createFactCheck(Map<String, dynamic> factCheckData) {
+    final apiService = ApiService();
+    return apiService.post('/fact-checks', data: factCheckData);
   }
 }

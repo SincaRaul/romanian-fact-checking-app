@@ -12,7 +12,7 @@ class FactCheckDetailsScreen extends ConsumerStatefulWidget {
   final String? sourceScreen;
 
   const FactCheckDetailsScreen({
-    super.key, 
+    super.key,
     required this.factCheckId,
     this.sourceScreen,
   });
@@ -90,8 +90,9 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
 
     shareText += '\n📱 Verificare independentă - FactCheck România';
 
-    // TODO: When deployed, add link to fact-check:
-    // shareText += '\n\n🔗 Vezi detalii complete: https://factcheck.ro/check/${factCheck.id}';
+    // Add link to fact-check when deployed
+    shareText +=
+        '\n\n🔗 Vezi detalii complete: https://factcheck-romania.vercel.app/details/${factCheck.id}';
 
     try {
       await Share.share(shareText, subject: 'Fact-Check: ${factCheck.title}');

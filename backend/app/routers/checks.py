@@ -183,3 +183,136 @@ async def test_different_models(request: schemas.GenerateCheckRequest):
             status_code=500, 
             detail=f"Error testing models: {str(e)}"
         )
+
+@router.get("/user-analytics/{user_id}", response_model=dict)
+def get_user_analytics(user_id: str, db: Session = Depends(get_db)):
+    """Get analytics for a specific user"""
+    try:
+        from redis import Redis
+        import os
+        
+        # Connect to Redis - use same config as analytics.py
+        redis_host = os.getenv("REDIS_HOST", "redis")  # Changed from localhost to redis
+        redis_port = int(os.getenv("REDIS_PORT", 6379))
+        redis_db = int(os.getenv("REDIS_DB", 0))
+        
+        r = Redis(host=redis_host, port=redis_port, db=redis_db)
+        
+        # Get unique stories viewed (using HyperLogLog)
+        stories_read_key = f"user_stories_read:{user_id}"
+        stories_read_count = r.pfcount(stories_read_key) or 0
+        
+        # Get unique stories shared
+        stories_shared_key = f"user_stories_shared:{user_id}" 
+        stories_shared_count = r.pfcount(stories_shared_key) or 0
+        
+        # Get questions submitted
+        questions_key = f"user_questions:{user_id}"
+        questions_count = r.pfcount(questions_key) or 0
+        
+        return {
+            "stories_read": stories_read_count,
+            "stories_shared": stories_shared_count, 
+            "questions_submitted": questions_count
+        }
+        
+    except Exception as e:
+        # Fallback to zeros if Redis is not available
+        print(f"Redis error in user analytics: {e}")
+        return {
+            "stories_read": 0,
+            "stories_shared": 0,
+            "questions_submitted": 0
+        }
+
+@router.post("/fact-checks", response_model=schemas.CheckOut)
+async def create_fact_check(
+    request: schemas.CreateFactCheckRequest,
+    db: Session = Depends(get_db)
+):
+    """Create a new fact-check manually"""
+    try:
+        # Create a new Check record in database
+        check_id = str(uuid.uuid4())
+        
+        # Create a dummy question first (since Check requires question_id)
+        question = models.Question(
+            id=str(uuid.uuid4()),
+            title=request.title,
+            body=None,
+            category=request.category,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        db.add(question)
+        db.flush()  # To get the question ID
+        
+        # Create the check
+        new_check = models.Check(
+            id=check_id,
+            question_id=question.id,
+            title=request.title,
+            verdict=request.verdict,
+            confidence=request.confidence,
+            summary=request.summary,
+            category=request.category,
+            sources=request.sources,
+            auto_generated=False,  # Manual creation
+            status="published",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            published_at=datetime.now()
+        )
+        
+        db.add(new_check)
+        db.commit()
+        db.refresh(new_check)
+        
+        return new_check
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create fact-check: {str(e)}")
+
+@router.post("/fact-checks", response_model=schemas.CheckOut)
+def create_fact_check(
+    request: schemas.CreateFactCheckRequest,
+    db: Session = Depends(get_db)
+):
+    """Create a new fact-check manually"""
+    try:
+        # Create a new Check record in database
+        check_id = str(uuid.uuid4())
+        
+        # Create a dummy question first (since Check requires question_id)
+        question = models.Question(
+            id=str(uuid.uuid4()),
+            title=request.title,
+            body=None,
+            status="checked"
+        )
+        db.add(question)
+        
+        # Create the fact-check
+        check = models.Check(
+            id=check_id,
+            question_id=question.id,
+            title=request.title,
+            verdict=request.verdict,
+            confidence=request.confidence,
+            summary=request.summary,
+            category=request.category,
+            sources=request.sources,
+            auto_generated=False,  # Manual fact-check
+            status="published",
+            published_at=datetime.utcnow()
+        )
+        db.add(check)
+        db.commit()
+        db.refresh(check)
+        
+        return check
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Error creating fact-check: {str(e)}")

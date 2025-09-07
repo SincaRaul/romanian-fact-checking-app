@@ -439,6 +439,13 @@ class _AskScreenState extends ConsumerState<AskScreen> {
     });
 
     try {
+      // Track the question submission
+      final analytics = ref.read(analyticsServiceProvider);
+      analytics.trackQuestion(
+        _questionController.text.trim(),
+        _selectedCategory,
+      );
+
       // Get the repository from provider
       final repository = ref.read(factCheckRepoProvider);
 
@@ -452,7 +459,7 @@ class _AskScreenState extends ConsumerState<AskScreen> {
         // Invalidate main providers - others will refresh automatically due to dependencies
         ref.invalidate(latestFactChecksProvider);
         ref.invalidate(personalizedFactChecksProvider);
-        
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

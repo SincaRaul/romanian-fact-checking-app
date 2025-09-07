@@ -10,11 +10,7 @@ class HotNewsStrip extends ConsumerWidget {
   final List<FactCheck> factChecks;
   final String? sourceScreen; // 'home' or 'explore'
 
-  const HotNewsStrip({
-    super.key, 
-    required this.factChecks,
-    this.sourceScreen,
-  });
+  const HotNewsStrip({super.key, required this.factChecks, this.sourceScreen});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -58,7 +54,6 @@ class HotNewsStrip extends ConsumerWidget {
       ],
     );
   }
-
 }
 
 class _HotCard extends ConsumerWidget {
@@ -96,7 +91,7 @@ class _HotCard extends ConsumerWidget {
           onTap: () {
             // Fire-and-forget analytics tracking
             unawaited(ref.read(analyticsServiceProvider).trackOpen(item.id));
-            
+
             // Include source information for proper back navigation
             final source = sourceScreen ?? 'home';
             context.push('/details/${item.id}?source=$source');
@@ -126,7 +121,9 @@ class _HotCard extends ConsumerWidget {
                         children: [
                           Text(
                             '🔥',
-                            style: TextStyle(fontSize: cardHeight * 0.12), // 12% din cardHeight
+                            style: TextStyle(
+                              fontSize: cardHeight * 0.12,
+                            ), // 12% din cardHeight
                           ),
                           SizedBox(width: cardWidth * 0.005),
                           Text(
@@ -143,7 +140,9 @@ class _HotCard extends ConsumerWidget {
                     // Verdict removed - mai mult spațiu pentru title
                   ],
                 ),
-                SizedBox(height: cardHeight * 0.06), // mai mult spacing pentru title
+                SizedBox(
+                  height: cardHeight * 0.06,
+                ), // mai mult spacing pentru title
                 // Title - mai mult spațiu, font mai mic
                 Expanded(
                   child: Text(

@@ -49,10 +49,14 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
                   child: TabBar(
                     controller: _tabController,
                     labelColor: Theme.of(context).colorScheme.primary,
-                    unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    unselectedLabelColor: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                     indicator: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.1),
                     ),
                     indicatorSize: TabBarIndicatorSize.tab,
                     indicatorPadding: const EdgeInsets.symmetric(horizontal: 8),
@@ -100,7 +104,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
 
   Widget _buildSearchAndFilters() {
     final categories = ref.watch(categoriesProvider);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -152,7 +156,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
               });
             },
           ),
-          
+
           // Clear Filters Button (only when needed)
           if (_selectedCategory != null || _selectedType != 'toate')
             Padding(
@@ -240,7 +244,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen>
           }
 
           // Category filter
-          if (_selectedCategory != null && check.category != _selectedCategory) {
+          if (_selectedCategory != null &&
+              check.category != _selectedCategory) {
             return false;
           }
 

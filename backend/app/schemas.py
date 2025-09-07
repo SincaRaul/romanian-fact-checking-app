@@ -67,3 +67,11 @@ class GenerateCheckResponse(BaseModel):
     auto_generated: bool = True
     created_at: datetime
     sources: Optional[List[str]] = None
+
+class CreateFactCheckRequest(BaseModel):
+    title: str = Field(min_length=10, max_length=500, description="The title of the fact-check")
+    verdict: str = Field(description="The verdict: true, false, mixed, or unclear")
+    confidence: int = Field(ge=0, le=100, description="Confidence percentage (0-100)")
+    summary: str = Field(min_length=50, description="The detailed explanation")
+    category: str = Field(description="The category of the fact-check")
+    sources: Optional[List[str]] = Field(default=None, description="List of sources")

@@ -26,12 +26,14 @@ except Exception as e:
     r = None
 
 class Event(BaseModel):
-    type: Literal["open", "read_complete", "share", "search"]
+    type: Literal["open", "read_complete", "share", "search", "question"]
     fact_check_id: Optional[constr(strip_whitespace=True, min_length=1)] = None
     uid: constr(strip_whitespace=True, min_length=8)
     ts: Optional[datetime] = None
     query: Optional[str] = None  # For search events
     result_count: Optional[int] = None  # For search events
+    question: Optional[str] = None  # For question events
+    category: Optional[str] = None  # For question events
 
 @router.post("/events", status_code=204)
 async def ingest_event(event: Event):
@@ -52,6 +54,16 @@ async def ingest_event(event: Event):
             pipe.pfadd(hll_key, event.uid)
             pipe.expire(hll_key, 60*60*48)  # 48 hour retention
             
+            # Track user actions for profile analytics
+            if event.type == "open":
+                user_reads_key = f"user_stories_read:{event.uid}"
+                pipe.pfadd(user_reads_key, event.fact_check_id)
+                pipe.expire(user_reads_key, 60*60*24*365)  # 1 year retention
+            elif event.type == "share":
+                user_shares_key = f"user_stories_shared:{event.uid}"
+                pipe.pfadd(user_shares_key, event.fact_check_id)
+                pipe.expire(user_shares_key, 60*60*24*365)  # 1 year retention
+            
             # Touch candidate set so the scorer knows what to recompute
             pipe.zincrby("hot:candidates", 1, event.fact_check_id)
             
@@ -64,6 +76,12 @@ async def ingest_event(event: Event):
             search_key = f"search:{hour_key}"
             pipe.hincrby(search_key, event.query.lower(), 1)
             pipe.expire(search_key, 60*60*24)  # 24 hour retention
+            
+        elif event.type == "question" and event.question:
+            # Track user questions for profile analytics
+            user_questions_key = f"user_questions:{event.uid}"
+            pipe.pfadd(user_questions_key, event.question.lower())
+            pipe.expire(user_questions_key, 60*60*24*365)  # 1 year retention
         
         await pipe.execute()
         

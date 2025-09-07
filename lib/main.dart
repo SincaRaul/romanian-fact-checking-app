@@ -12,6 +12,8 @@ import 'screens/support/support_form_screen.dart';
 import 'models/support_category.dart';
 import 'features/home/new_home_screen.dart';
 import 'features/theme/app_theme.dart';
+import 'features/admin/create_fact_check_screen.dart';
+import 'features/admin/admin_providers.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +26,11 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final onboardingState = ref.watch(onboardingProvider);
+
+    // Initialize admin auth service to check for stored token
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(adminAuthProvider).checkStoredToken();
+    });
 
     final router = GoRouter(
       initialLocation: '/home',
@@ -114,6 +121,11 @@ class MyApp extends ConsumerWidget {
                   factCheckId: factCheckId,
                 );
               },
+            ),
+            GoRoute(
+              path: '/admin/create-fact-check',
+              name: 'admin-create-fact-check',
+              builder: (context, state) => const CreateFactCheckScreen(),
             ),
           ],
         ),

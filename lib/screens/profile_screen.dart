@@ -3,7 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/onboarding_providers.dart';
 import '../providers/category_providers.dart';
+import '../providers/fact_check_providers.dart';
 import '../models/category.dart';
+import '../features/admin/admin_providers.dart';
+import '../features/admin/admin_password_dialog.dart';
 import 'support/support_category_screen.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -32,7 +35,7 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 24),
 
           // Statistics Section
-          _buildStatisticsSection(context),
+          _buildStatisticsSection(context, ref),
           const SizedBox(height: 24),
 
           // Categories Section
@@ -46,6 +49,10 @@ class ProfileScreen extends ConsumerWidget {
 
           // Settings Section
           _buildSettingsSection(context, ref),
+          const SizedBox(height: 24),
+
+          // Admin Section
+          _buildAdminSection(context, ref),
           const SizedBox(height: 24),
 
           // About Section
@@ -134,7 +141,9 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatisticsSection(BuildContext context) {
+  Widget _buildStatisticsSection(BuildContext context, WidgetRef ref) {
+    final userAnalytics = ref.watch(userAnalyticsProvider);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -145,42 +154,131 @@ class ProfileScreen extends ConsumerWidget {
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.visibility,
-                title: 'Vizualizări',
-                value: '47',
-                subtitle: 'fact-check-uri',
+
+        userAnalytics.when(
+          data: (analytics) => Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.article,
+                      title: 'Știri citite',
+                      value: '${analytics['stories_read'] ?? 0}',
+                      subtitle: 'articole',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.share,
+                      title: 'Știri distribuite',
+                      value: '${analytics['stories_shared'] ?? 0}',
+                      subtitle: 'partajări',
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.share,
-                title: 'Partajări',
-                value: '12',
-                subtitle: 'articole',
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.quiz,
+                      title: 'Întrebări',
+                      value: '${analytics['questions_submitted'] ?? 0}',
+                      subtitle: 'trimise',
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                context,
-                icon: Icons.quiz,
-                title: 'Întrebări',
-                value: '3',
-                subtitle: 'trimise',
+            ],
+          ),
+          loading: () => Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.article,
+                      title: 'Știri citite',
+                      value: '...',
+                      subtitle: 'se încarcă',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.share,
+                      title: 'Știri distribuite',
+                      value: '...',
+                      subtitle: 'se încarcă',
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.quiz,
+                      title: 'Întrebări',
+                      value: '...',
+                      subtitle: 'se încarcă',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          error: (_, __) => Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.article,
+                      title: 'Știri citite',
+                      value: '0',
+                      subtitle: 'eroare',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.share,
+                      title: 'Știri distribuite',
+                      value: '0',
+                      subtitle: 'eroare',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      context,
+                      icon: Icons.quiz,
+                      title: 'Întrebări',
+                      value: '0',
+                      subtitle: 'eroare',
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -392,6 +490,87 @@ class ProfileScreen extends ConsumerWidget {
       subtitle: Text(subtitle),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
+    );
+  }
+
+  Widget _buildAdminSection(BuildContext context, WidgetRef ref) {
+    final isAdminMode = ref.watch(isAdminProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Admin',
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 12),
+        if (!isAdminMode) ...[
+          _buildSettingsItem(
+            context,
+            icon: Icons.admin_panel_settings,
+            title: 'Modul Admin',
+            subtitle: 'Accesează funcționalități admin',
+            onTap: () => _showAdminPasswordDialog(context, ref),
+          ),
+        ] else ...[
+          _buildSettingsItem(
+            context,
+            icon: Icons.add_circle,
+            title: 'Creează Fact-Check',
+            subtitle: 'Adaugă o verificare manuală',
+            onTap: () => context.push('/admin/create-fact-check'),
+          ),
+          _buildSettingsItem(
+            context,
+            icon: Icons.logout,
+            title: 'Ieși din Admin',
+            subtitle: 'Dezactivează modul admin',
+            onTap: () => _exitAdminMode(context, ref),
+          ),
+        ],
+      ],
+    );
+  }
+
+  void _showAdminPasswordDialog(BuildContext context, WidgetRef ref) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AdminPasswordDialog(
+        onPasswordSubmit: (password) async {
+          final adminAuth = ref.read(adminAuthProvider);
+          final success = await adminAuth.login(password);
+          if (success && context.mounted) {
+            Navigator.of(context).pop(true);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Modul admin activat!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Parolă incorectă!'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  void _exitAdminMode(BuildContext context, WidgetRef ref) async {
+    final adminAuth = ref.read(adminAuthProvider);
+    await adminAuth.logout();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Modul admin dezactivat!'),
+        backgroundColor: Colors.orange,
+      ),
     );
   }
 

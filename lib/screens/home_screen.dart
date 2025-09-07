@@ -120,7 +120,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildQuickStats() {
     final asyncStats = ref.watch(homeStatisticsProvider);
-    
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -199,7 +199,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 32,
               width: 200,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimaryContainer.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -208,7 +210,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               height: 16,
               width: 300,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.2),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onPrimaryContainer.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),

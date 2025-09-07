@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "factual"
     POSTGRES_USER: str = "factual" 
     POSTGRES_PASSWORD: str = "secret"
+    
+    # Admin Auth
+    JWT_SECRET: str = "change-me-in-production"
+    ADMIN_PASS_SHA256: str = ""
 
     class Config:
         env_file = ".env"

@@ -1,4 +1,5 @@
 // lib/services/analytics_service.dart
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -50,7 +51,7 @@ class AnalyticsService {
       await prefs.setInt(lastOpenKey, now);
     } catch (e) {
       // Silently ignore analytics errors - don't affect user experience
-      print('Analytics error: $e');
+      debugPrint('Analytics error: $e');
     }
   }
 
@@ -71,7 +72,7 @@ class AnalyticsService {
         },
       );
     } catch (e) {
-      print('Analytics error: $e');
+      debugPrint('Analytics error: $e');
     }
   }
 
@@ -90,7 +91,26 @@ class AnalyticsService {
         },
       );
     } catch (e) {
-      print('Analytics error: $e');
+      debugPrint('Analytics error: $e');
+    }
+  }
+
+  /// Track when user submits a question/request for fact-check generation
+  Future<void> trackQuestion(String question, String? category) async {
+    try {
+      final uid = await getAnonId();
+      await _dio.post(
+        '/events',
+        data: {
+          'type': 'question',
+          'question': question.toLowerCase().trim(),
+          'category': category ?? 'general',
+          'uid': uid,
+          'ts': DateTime.now().toUtc().toIso8601String(),
+        },
+      );
+    } catch (e) {
+      debugPrint('Analytics error: $e');
     }
   }
 }
