@@ -36,11 +36,20 @@ class SupportCategoryScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Expanded(
               child: ListView.separated(
-                itemCount: SupportCategory.values.length,
+                itemCount: SupportCategory.values
+                    .where(
+                      (category) => category != SupportCategory.incorrectInfo,
+                    )
+                    .length,
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
-                  final category = SupportCategory.values[index];
+                  final availableCategories = SupportCategory.values
+                      .where(
+                        (category) => category != SupportCategory.incorrectInfo,
+                      )
+                      .toList();
+                  final category = availableCategories[index];
                   return _buildCategoryCard(context, category);
                 },
               ),

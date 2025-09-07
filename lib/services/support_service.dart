@@ -14,6 +14,7 @@ class SupportService {
     required String description,
     String? sourceUrl,
     String? userEmail,
+    String? factCheckId,
   }) async {
     final ticket = SupportTicket(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -22,6 +23,7 @@ class SupportService {
       sourceUrl: sourceUrl,
       createdAt: DateTime.now(),
       userEmail: userEmail,
+      factCheckId: factCheckId,
     );
 
     try {

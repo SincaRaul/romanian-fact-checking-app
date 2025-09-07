@@ -116,8 +116,7 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
                         final factCheck = filteredChecks[index];
                         return FactCheckCard(
                           factCheck: factCheck,
-                          onTap: () =>
-                              context.push('/fact-check/${factCheck.id}'),
+                          onTap: () => context.push('/details/${factCheck.id}'),
                         );
                       }, childCount: filteredChecks.length),
                     ),
@@ -262,6 +261,7 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
     return Card(
       elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 4),
+      color: colorScheme.surface, // solid background, no transparency
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(color: colorScheme.outlineVariant),
@@ -271,12 +271,12 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Leading pill skeleton
+            // Leading pill skeleton - solid color, no transparency
             Container(
               width: 8,
               height: 60,
               decoration: BoxDecoration(
-                color: colorScheme.surfaceVariant,
+                color: colorScheme.surfaceContainerHigh,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -285,11 +285,11 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Title skeleton
+                  // Title skeleton - solid colors, different shades for hierarchy
                   Container(
                     height: 20,
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceVariant,
+                      color: colorScheme.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -298,19 +298,19 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
                     height: 20,
                     width: 200,
                     decoration: BoxDecoration(
-                      color: colorScheme.surfaceVariant,
+                      color: colorScheme.surfaceContainer,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Metadata skeleton
+                  // Metadata skeleton - lighter shade
                   Row(
                     children: [
                       Container(
                         height: 16,
                         width: 60,
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceVariant,
+                          color: colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -319,7 +319,7 @@ class _NewHomeScreenState extends ConsumerState<NewHomeScreen> {
                         height: 16,
                         width: 40,
                         decoration: BoxDecoration(
-                          color: colorScheme.surfaceVariant,
+                          color: colorScheme.surfaceContainerLow,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),

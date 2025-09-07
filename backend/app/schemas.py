@@ -22,6 +22,7 @@ class SupportTicketCreate(BaseModel):
     description: str = Field(min_length=10)
     sourceUrl: Optional[str] = None
     userEmail: Optional[str] = None
+    factCheckId: Optional[str] = None
 
 class SupportTicketResponse(BaseModel):
     id: str
@@ -29,6 +30,7 @@ class SupportTicketResponse(BaseModel):
     description: str
     sourceUrl: Optional[str]
     userEmail: Optional[str]
+    factCheckId: Optional[str]
     createdAt: datetime
 
 class VoteOut(BaseModel):

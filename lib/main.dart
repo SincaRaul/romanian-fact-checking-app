@@ -8,6 +8,8 @@ import 'screens/main_shell.dart';
 import 'screens/explore_screen.dart';
 import 'screens/ask_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/support/support_form_screen.dart';
+import 'models/support_category.dart';
 import 'features/home/new_home_screen.dart';
 import 'features/theme/app_theme.dart';
 
@@ -75,6 +77,38 @@ class MyApp extends ConsumerWidget {
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
                 return FactCheckDetailsScreen(factCheckId: id);
+              },
+            ),
+            GoRoute(
+              path: '/support/form',
+              name: 'support-form',
+              builder: (context, state) {
+                final categoryParam =
+                    state.uri.queryParameters['category'] ?? 'incorrectInfo';
+                final factCheckId = state.uri.queryParameters['factCheckId'];
+
+                // Convertesc string-ul în SupportCategory
+                SupportCategory category;
+                switch (categoryParam) {
+                  case 'bugReport':
+                    category = SupportCategory.bugReport;
+                    break;
+                  case 'featureRequest':
+                    category = SupportCategory.featureRequest;
+                    break;
+                  case 'generalQuestion':
+                    category = SupportCategory.generalQuestion;
+                    break;
+                  case 'incorrectInfo':
+                  default:
+                    category = SupportCategory.incorrectInfo;
+                    break;
+                }
+
+                return SupportFormScreen(
+                  category: category,
+                  factCheckId: factCheckId,
+                );
               },
             ),
           ],

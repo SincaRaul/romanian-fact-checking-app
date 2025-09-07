@@ -7,8 +7,13 @@ import '../../providers/fact_check_providers.dart';
 
 class SupportFormScreen extends ConsumerStatefulWidget {
   final SupportCategory category;
+  final String? factCheckId;
 
-  const SupportFormScreen({super.key, required this.category});
+  const SupportFormScreen({
+    super.key,
+    required this.category,
+    this.factCheckId,
+  });
 
   @override
   ConsumerState<SupportFormScreen> createState() => _SupportFormScreenState();
@@ -19,14 +24,29 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
   final _descriptionController = TextEditingController();
   final _sourceController = TextEditingController();
   final _emailController = TextEditingController();
+  final _factCheckIdController = TextEditingController();
 
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-completez ID-ul fact-check-ului dacă este furnizat
+    if (widget.factCheckId != null) {
+      _factCheckIdController.text = widget.factCheckId!;
+      // Pentru informații incorecte, setez cursorul la final pentru ușurința utilizatorului
+      if (widget.category == SupportCategory.incorrectInfo) {
+        _descriptionController.text = '';
+      }
+    }
+  }
 
   @override
   void dispose() {
     _descriptionController.dispose();
     _sourceController.dispose();
     _emailController.dispose();
+    _factCheckIdController.dispose();
     super.dispose();
   }
 
@@ -42,6 +62,12 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
             // Category info card
             _buildCategoryInfoCard(context),
             const SizedBox(height: 24),
+
+            // Fact-Check ID field (for incorrect information reports)
+            if (widget.category == SupportCategory.incorrectInfo) ...[
+              _buildFactCheckIdField(context),
+              const SizedBox(height: 16),
+            ],
 
             // Description field
             _buildDescriptionField(context),
@@ -100,6 +126,50 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFactCheckIdField(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'ID Fact-Check (auto-completat)',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'ID-ul fact-check-ului pentru care raportezi problema.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _factCheckIdController,
+          readOnly:
+              widget.factCheckId != null, // Read-only dacă e pre-completat
+          decoration: InputDecoration(
+            hintText: 'ID-ul fact-check-ului',
+            prefixIcon: const Icon(Icons.numbers),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            filled: widget.factCheckId != null,
+            fillColor: widget.factCheckId != null
+                ? theme.colorScheme.surfaceVariant.withValues(alpha: 0.5)
+                : null,
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Te rugăm să introduci ID-ul fact-check-ului';
+            }
+            return null;
+          },
+        ),
+      ],
     );
   }
 
@@ -272,11 +342,14 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
         userEmail: _emailController.text.trim().isEmpty
             ? null
             : _emailController.text.trim(),
+        factCheckId: _factCheckIdController.text.trim().isEmpty
+            ? null
+            : _factCheckIdController.text.trim(),
       );
 
       if (mounted) {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
+        // Navigăm înapoi la categoria de support și apoi la home
+        Navigator.of(context).popUntil((route) => route.isFirst);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -21,5 +21,32 @@
     "sourceUrl": "https://www.facebook.com/photo/?fbid=2249314585532796&set=a.159956157801993",
     "createdAt": "2025-09-07T11:13:37.710",
     "userEmail": null
+  },
+  {
+    "id": "1757240129816",
+    "category": "incorrectInfo",
+    "description": "Am eu un verisor conduce de la 7 ani zici ca sumacher e.",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-07T13:15:29.816",
+    "userEmail": "cacatpansat22@gmail.com",
+    "factCheckId": null
+  },
+  {
+    "id": "1757240261431",
+    "category": "incorrectInfo",
+    "description": "cacaaccacacaacca",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-07T13:17:41.431",
+    "userEmail": null,
+    "factCheckId": null
+  },
+  {
+    "id": "1757240369218",
+    "category": "incorrectInfo",
+    "description": "asdasdasdsadasasdsad",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-07T13:19:29.218",
+    "userEmail": null,
+    "factCheckId": "68ff655e-bbd0-4492-8e05-6baeec6ac446"
   }
 ]

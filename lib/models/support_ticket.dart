@@ -8,6 +8,7 @@ class SupportTicket {
   final String? sourceUrl;
   final DateTime createdAt;
   final String? userEmail;
+  final String? factCheckId;
 
   const SupportTicket({
     required this.id,
@@ -16,6 +17,7 @@ class SupportTicket {
     this.sourceUrl,
     required this.createdAt,
     this.userEmail,
+    this.factCheckId,
   });
 
   Map<String, dynamic> toJson() {
@@ -26,6 +28,7 @@ class SupportTicket {
       'sourceUrl': sourceUrl,
       'createdAt': createdAt.toIso8601String(),
       'userEmail': userEmail,
+      'factCheckId': factCheckId,
     };
   }
 
@@ -39,6 +42,7 @@ class SupportTicket {
       sourceUrl: json['sourceUrl'] as String?,
       createdAt: DateTime.parse(json['createdAt'] as String),
       userEmail: json['userEmail'] as String?,
+      factCheckId: json['factCheckId'] as String?,
     );
   }
 }
