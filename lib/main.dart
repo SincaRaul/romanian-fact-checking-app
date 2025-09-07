@@ -76,7 +76,11 @@ class MyApp extends ConsumerWidget {
               name: 'details',
               builder: (context, state) {
                 final id = state.pathParameters['id']!;
-                return FactCheckDetailsScreen(factCheckId: id);
+                final source = state.uri.queryParameters['source'];
+                return FactCheckDetailsScreen(
+                  factCheckId: id,
+                  sourceScreen: source,
+                );
               },
             ),
             GoRoute(

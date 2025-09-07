@@ -7,12 +7,58 @@ import '../models/fact_check.dart';
 import '../providers/fact_check_providers.dart';
 import '../utils/verdict_extensions.dart';
 
-class FactCheckDetailsScreen extends ConsumerWidget {
+class FactCheckDetailsScreen extends ConsumerStatefulWidget {
   final String factCheckId;
+  final String? sourceScreen;
 
-  const FactCheckDetailsScreen({super.key, required this.factCheckId});
+  const FactCheckDetailsScreen({
+    super.key, 
+    required this.factCheckId,
+    this.sourceScreen,
+  });
+
+  @override
+  ConsumerState<FactCheckDetailsScreen> createState() =>
+      _FactCheckDetailsScreenState();
+}
+
+class _FactCheckDetailsScreenState
+    extends ConsumerState<FactCheckDetailsScreen> {
+  bool _hasTrackedOpen = false;
+  DateTime? _entryTime;
+
+  @override
+  void initState() {
+    super.initState();
+    _entryTime = DateTime.now();
+  }
+
+  @override
+  void dispose() {
+    // Track engagement time if user stayed >10 seconds
+    if (_entryTime != null) {
+      final timeSpent = DateTime.now().difference(_entryTime!);
+      if (timeSpent.inSeconds > 10) {
+        final analytics = ref.read(analyticsServiceProvider);
+        analytics.trackEngagement(widget.factCheckId, 'read_complete');
+      }
+    }
+    super.dispose();
+  }
+
+  void _trackOpen() {
+    if (!_hasTrackedOpen) {
+      _hasTrackedOpen = true;
+      final analytics = ref.read(analyticsServiceProvider);
+      analytics.trackOpen(widget.factCheckId);
+    }
+  }
 
   Future<void> _shareFactCheck(FactCheck factCheck) async {
+    // Track share action
+    final analytics = ref.read(analyticsServiceProvider);
+    analytics.trackEngagement(factCheck.id, 'share');
+
     final verdict = factCheck.verdict.displayName;
     final confidence = factCheck.confidence;
 
@@ -56,12 +102,8 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final factCheckAsync = ref.watch(factCheckByIdProvider(factCheckId));
-
-    // Obțin parametrul 'from' pentru a ști unde să mă întorc
-    final uri = GoRouterState.of(context).uri;
-    final fromPage = uri.queryParameters['from'] ?? 'home';
+  Widget build(BuildContext context) {
+    final factCheckAsync = ref.watch(factCheckByIdProvider(widget.factCheckId));
 
     return Scaffold(
       appBar: AppBar(
@@ -70,7 +112,8 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             // Mă întorc la pagina de unde am venit
-            switch (fromPage) {
+            final source = widget.sourceScreen ?? 'home';
+            switch (source) {
               case 'explore':
                 context.go('/explore');
                 break;
@@ -109,6 +152,11 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
           ),
         ),
         data: (factCheck) {
+          // Track the open when data loads
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _trackOpen();
+          });
+
           if (factCheck == null) {
             return Center(
               child: Column(

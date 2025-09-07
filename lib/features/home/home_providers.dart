@@ -4,6 +4,9 @@ import 'timeframe.dart';
 
 final timeframeProvider = StateProvider<Timeframe>((_) => Timeframe.today);
 
+// Provider pentru tipul de fact-check (toate, automate, manuale)
+final factCheckTypeProvider = StateProvider<String>((_) => 'toate');
+
 // Mock provider pentru statistici - poate fi înlocuit cu unul real când adaugi endpoint
 final statsProvider = StateProvider<Map<String, dynamic>>((ref) {
   final timeframe = ref.watch(timeframeProvider);

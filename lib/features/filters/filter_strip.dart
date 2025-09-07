@@ -7,15 +7,15 @@ class FilterStrip extends StatelessWidget {
     required this.categories,
     required this.selectedKey,
     required this.onCategory,
-    required this.sort,
-    required this.onSort,
+    required this.selectedType,
+    required this.onTypeChanged,
   });
 
   final List<Map<String, String>> categories;
   final String? selectedKey;
   final ValueChanged<String?> onCategory;
-  final String sort;
-  final ValueChanged<String> onSort;
+  final String selectedType;
+  final ValueChanged<String> onTypeChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +25,36 @@ class FilterStrip extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Type filter dropdown with section header
+        Row(
+          children: [
+            Text(
+              'Ultimele verificări',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            DropdownButton<String>(
+              value: selectedType,
+              underline: const SizedBox.shrink(),
+              icon: Icon(Icons.filter_alt, color: colorScheme.onSurfaceVariant),
+              items: const [
+                DropdownMenuItem(value: 'toate', child: Text('Toate')),
+                DropdownMenuItem(value: 'automate', child: Text('Automate')),
+                DropdownMenuItem(value: 'manuale', child: Text('Manuale')),
+              ],
+              onChanged: (value) => value != null ? onTypeChanged(value) : null,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface,
+              ),
+              dropdownColor: colorScheme.surface,
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 12),
+
         // Categories chips
         SizedBox(
           height: 40,
@@ -77,42 +107,6 @@ class FilterStrip extends StatelessWidget {
               }),
             ],
           ),
-        ),
-
-        const SizedBox(height: 12),
-
-        // Sort dropdown with section header
-        Row(
-          children: [
-            Text(
-              'Ultimele verificări',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const Spacer(),
-            DropdownButton<String>(
-              value: sort,
-              underline: const SizedBox.shrink(),
-              icon: Icon(Icons.sort, color: colorScheme.onSurfaceVariant),
-              items: const [
-                DropdownMenuItem(value: 'new', child: Text('Cele mai noi')),
-                DropdownMenuItem(
-                  value: 'popular',
-                  child: Text('Cele mai verificate'),
-                ),
-                DropdownMenuItem(
-                  value: 'accuracy',
-                  child: Text('Cele mai precise'),
-                ),
-              ],
-              onChanged: (value) => value != null ? onSort(value) : null,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-              dropdownColor: colorScheme.surface,
-            ),
-          ],
         ),
       ],
     );

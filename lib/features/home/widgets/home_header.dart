@@ -1,16 +1,18 @@
 // lib/features/home/widgets/home_header.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../providers/fact_check_providers.dart';
 
-class HomeHeader extends StatefulWidget {
+class HomeHeader extends ConsumerStatefulWidget {
   const HomeHeader({super.key, this.onSearchChanged});
 
   final ValueChanged<String>? onSearchChanged;
 
   @override
-  State<HomeHeader> createState() => _HomeHeaderState();
+  ConsumerState<HomeHeader> createState() => _HomeHeaderState();
 }
 
-class _HomeHeaderState extends State<HomeHeader> {
+class _HomeHeaderState extends ConsumerState<HomeHeader> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -74,7 +76,22 @@ class _HomeHeaderState extends State<HomeHeader> {
                 vertical: 12,
               ),
             ),
-            onChanged: widget.onSearchChanged,
+            onChanged: (value) {
+              widget.onSearchChanged?.call(value);
+
+              // Track search after user stops typing (debounced)
+              if (value.trim().isNotEmpty && value.trim().length >= 3) {
+                Future.delayed(const Duration(milliseconds: 500), () {
+                  if (_searchController.text.trim() == value.trim()) {
+                    final analytics = ref.read(analyticsServiceProvider);
+                    analytics.trackSearch(
+                      value.trim(),
+                      0,
+                    ); // We'll update count later
+                  }
+                });
+              }
+            },
             textInputAction: TextInputAction.search,
           ),
         ],
