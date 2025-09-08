@@ -535,7 +535,7 @@ class ProfileScreen extends ConsumerWidget {
   }
 
   void _showAdminPasswordDialog(BuildContext context, WidgetRef ref) async {
-    final result = await showDialog<bool>(
+    await showDialog<bool>(
       context: context,
       builder: (context) => AdminPasswordDialog(
         onPasswordSubmit: (password) async {
@@ -566,12 +566,14 @@ class ProfileScreen extends ConsumerWidget {
     final adminAuth = ref.read(adminAuthProvider);
     await adminAuth.logout();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Modul admin dezactivat!'),
-        backgroundColor: Colors.orange,
-      ),
-    );
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Modul admin dezactivat!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    }
   }
 
   Widget _buildAboutSection(BuildContext context) {

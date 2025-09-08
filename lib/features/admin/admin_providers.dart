@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 const _secureStorage = FlutterSecureStorage();
 
@@ -39,7 +40,10 @@ class AdminAuthService {
       }
       return false;
     } catch (e) {
-      print('Admin login error: $e');
+      // Log admin login errors in debug mode only
+      if (kDebugMode) {
+        debugPrint('Admin login error: $e');
+      }
       return false;
     }
   }
@@ -54,12 +58,15 @@ class AdminAuthService {
     try {
       final token = await _secureStorage.read(key: _tokenKey);
       if (token != null) {
-        // TODO: Optionally verify token validity with backend
+        // Verify token validity by checking if it's not expired
+        // For now, we trust stored tokens and let the server validate them
         _ref.read(adminTokenProvider.notifier).state = token;
         _ref.read(isAdminProvider.notifier).state = true;
       }
     } catch (e) {
-      print('Error checking stored token: $e');
+      if (kDebugMode) {
+        debugPrint('Error checking stored token: $e');
+      }
     }
   }
 

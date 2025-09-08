@@ -147,7 +147,7 @@ class _CreateFactCheckScreenState extends ConsumerState<CreateFactCheckScreen> {
               // Buton pentru a ieși din modul admin
               final adminAuth = ref.read(adminAuthProvider);
               await adminAuth.logout();
-              if (mounted) context.pop();
+              if (context.mounted) context.pop();
             },
             tooltip: 'Ieși din modul admin',
           ),
@@ -184,7 +184,7 @@ class _CreateFactCheckScreenState extends ConsumerState<CreateFactCheckScreen> {
 
               // Verdict
               DropdownButtonFormField<String>(
-                value: _selectedVerdict,
+                initialValue: _selectedVerdict,
                 decoration: const InputDecoration(
                   labelText: 'Verdict *',
                   border: OutlineInputBorder(),
@@ -219,7 +219,7 @@ class _CreateFactCheckScreenState extends ConsumerState<CreateFactCheckScreen> {
 
               // Categorie
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: const InputDecoration(
                   labelText: 'Categorie *',
                   border: OutlineInputBorder(),
