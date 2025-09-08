@@ -349,28 +349,17 @@ class _AskScreenState extends ConsumerState<AskScreen> {
         _buildPopularQuestionCard(
           '⚽ România se califică la EURO 2024?',
           '25 voturi',
-          () {
-            _questionController.text = 'România se califică la EURO 2024?';
-            setState(() => _selectedCategory = 'sports');
-          },
+          () => _showFeatureComingSoonDialog(context),
         ),
         _buildPopularQuestionCard(
           '💰 Salariul minim crește la 2500 lei?',
           '18 voturi',
-          () {
-            _questionController.text =
-                'Salariul minim crește la 2500 lei în 2025?';
-            setState(() => _selectedCategory = 'economy');
-          },
+          () => _showFeatureComingSoonDialog(context),
         ),
         _buildPopularQuestionCard(
           '🏥 Vaccinurile COVID sunt obligatorii?',
           '12 voturi',
-          () {
-            _questionController.text =
-                'Vaccinurile COVID sunt obligatorii pentru copii în România?';
-            setState(() => _selectedCategory = 'health');
-          },
+          () => _showFeatureComingSoonDialog(context),
         ),
       ],
     );
@@ -493,5 +482,31 @@ class _AskScreenState extends ConsumerState<AskScreen> {
         });
       }
     }
+  }
+
+  void _showFeatureComingSoonDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: const Icon(Icons.construction, size: 48, color: Colors.orange),
+          title: const Text(
+            'Funcționalitate în dezvoltare',
+            textAlign: TextAlign.center,
+          ),
+          content: const Text(
+            'Această funcționalitate va fi implementată în curând! '
+            'Pentru moment, poți introduce manual întrebarea ta în câmpul de mai sus.',
+            textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Am înțeles'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
