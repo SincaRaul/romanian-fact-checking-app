@@ -317,10 +317,9 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
             logger.warning("Could not dump response: %s", e)
 
     def _extract_sources(self, response) -> list:
-        """Extract sources from groundingMetadata.groundingChunks as per Gemini API docs"""
+        """Extract sources from groundingMetadata.groundingChunks - keep it simple"""
         out = []
 
-        # Extract from groundingMetadata.groundingChunks[*].web.{uri, title}
         try:
             # Navigate: response.candidates[0].grounding_metadata.grounding_chunks
             cands = getattr(response, "candidates", []) or []
@@ -336,24 +335,20 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                                 uri = getattr(web, "uri", "") or ""
                                 title = getattr(web, "title", "Sursă web") or "Sursă web"
                                 
-                                logger.debug(f"Chunk {i}: title='{title}', uri='{uri}'")
-                                
                                 if uri.startswith(("http://", "https://")):
-                                    # Clean title - remove problematic characters  
-                                    title = title.replace('[', '').replace(']', '').replace('|', '-')
-                                    if len(title) > 80:
-                                        title = title[:77] + "..."
-                                    out.append(f"{title} - {uri}")
+                                    # Clean title 
+                                    clean_title = title.replace('[', '').replace(']', '').replace('|', '-')
+                                    if len(clean_title) > 80:
+                                        clean_title = clean_title[:77] + "..."
+                                    out.append(f"{clean_title} - {uri}")
                     else:
-                        logger.info("No grounding_chunks found in grounding_metadata")
+                        logger.info("No grounding_chunks found")
                 else:
-                    logger.info("No grounding_metadata found in first candidate")
-            else:
-                logger.info("No candidates found in response")
+                    logger.info("No grounding_metadata found")
         except Exception as e:
-            logger.warning("Error extracting from grounding_chunks: %s", e)
+            logger.warning("Error extracting sources: %s", e)
 
-        # Deduplicate sources in order
+        # Deduplicate
         seen = set()
         unique_sources = []
         for source in out:
@@ -361,8 +356,159 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                 seen.add(source)
                 unique_sources.append(source)
         
-        logger.info(f"Extracted {len(unique_sources)} unique sources from grounding metadata")
-        return unique_sources[:4]  # Limit to 4 sources max
+        logger.info(f"Extracted {len(unique_sources)} sources")
+        return unique_sources[:4]
+
+    def _is_wikipedia_source(self, title: str, uri: str) -> bool:
+        """Check if source is from Wikipedia and should be filtered out"""
+        if not title and not uri:
+            return False
+            
+        title_lower = title.lower() if title else ""
+        uri_lower = uri.lower() if uri else ""
+        
+        # Wikipedia indicators in title or URI
+        wikipedia_indicators = [
+            "wikipedia", "wiki", "wikimedia", "wikipedia.org", 
+            "wiki.ro", "ro.wikipedia", "en.wikipedia"
+        ]
+        
+        for indicator in wikipedia_indicators:
+            if indicator in title_lower or indicator in uri_lower:
+                return True
+                
+        return False
+
+    def _convert_title_to_homepage_url(self, title: str) -> str:
+        """Convert source title to homepage URL - ALL grounding URLs are redirects"""
+        if not title:
+            return ""
+            
+        # Extract domain from title and create homepage URL
+        domain = self._extract_domain_from_title(title)
+        if domain:
+            homepage_url = f"https://{domain}"
+            logger.info(f"Converted title '{title}' to homepage: {homepage_url}")
+            return homepage_url
+        
+        return ""
+
+    def _extract_real_url_from_redirect(self, redirect_url: str, title: str) -> str:
+        """Try to extract real URL from Google redirect or proxy URL"""
+        if not redirect_url:
+            return redirect_url
+        
+        # If it looks like a real, direct URL to an article, keep it
+        if self._is_likely_real_article_url(redirect_url):
+            logger.info(f"Using direct article URL: {redirect_url}")
+            return redirect_url
+            
+        # If it's a Google redirect URL, try to extract the real domain and create a proper URL
+        if "vertexaisearch.cloud.google.com" in redirect_url or "google.com" in redirect_url:
+            # Extract domain from title if possible
+            domain_from_title = self._extract_domain_from_title(title)
+            if domain_from_title:
+                # Create a basic URL to the homepage - better than broken redirect
+                real_url = f"https://{domain_from_title}"
+                logger.info(f"Converted redirect URL to domain: {redirect_url} -> {real_url}")
+                return real_url
+        
+        # Return original URL if no conversion possible
+        return redirect_url
+    
+    def _is_likely_real_article_url(self, url: str) -> bool:
+        """Check if URL looks like a real article URL vs a redirect/proxy"""
+        if not url or not url.startswith(("http://", "https://")):
+            return False
+            
+        # Exclude known redirect/proxy domains
+        redirect_domains = [
+            "vertexaisearch.cloud.google.com",
+            "google.com/url",
+            "googleusercontent.com"
+        ]
+        
+        for redirect_domain in redirect_domains:
+            if redirect_domain in url:
+                return False
+        
+        # Check for article-like patterns in URL
+        article_indicators = [
+            "/news/", "/sport/", "/sports/", "/article/", "/stire/", "/articol/",
+            "/football/", "/fotbal/", "/euro-", "/transfer", "/mbappe", "/real-madrid"
+        ]
+        
+        url_lower = url.lower()
+        for indicator in article_indicators:
+            if indicator in url_lower:
+                logger.info(f"URL appears to be article link: {url}")
+                return True
+        
+        # If URL has reasonable length and structure, it might be real
+        if len(url) > 50 and url.count('/') >= 3:
+            logger.info(f"URL structure suggests real article: {url}")
+            return True
+            
+        return False
+    
+    def _extract_domain_from_title(self, title: str) -> str:
+        """Extract domain from source title like 'digisport.ro', 'frf.ro', etc."""
+        if not title:
+            return ""
+            
+        # Common Romanian and international news domains that might appear in titles
+        common_domains = [
+            # Romanian sports
+            "digisport.ro", "gsp.ro", "prosport.ro", "fanatik.ro", "sportexpress.ro",
+            "frf.ro", "lpf.ro", "fcsb.ro", "steauafc.com",
+            
+            # Romanian news
+            "digi24.ro", "stirileprotv.ro", "antena3.ro", "hotnews.ro", 
+            "adevarul.ro", "libertatea.ro", "gandul.ro", "ziare.com",
+            "romania.europalibera.org", "mediafax.ro", "agerpres.ro",
+            
+            # International sports and news
+            "eurosport.ro", "euronews.ro", "bbc.com", "cnn.com",
+            "skysports.com", "espn.com", "uefa.com", "fifa.com",
+            "realmadrid.com", "fcbarcelona.com", "manutd.com",
+            "aljazeera.com", "theguardian.com", "reuters.com",
+            "marca.com", "sport.es", "gazzetta.it", "lequipe.fr"
+        ]
+        
+        title_lower = title.lower()
+        for domain in common_domains:
+            if domain in title_lower:
+                logger.info(f"Found domain '{domain}' in title '{title}'")
+                return domain
+                
+        # Try to extract any domain pattern from title
+        import re
+        
+        # Pattern for .ro domains
+        ro_pattern = r'\b([a-zA-Z0-9-]+\.ro)\b'
+        match = re.search(ro_pattern, title_lower)
+        if match:
+            domain = match.group(1)
+            logger.info(f"Extracted .ro domain '{domain}' from title '{title}'")
+            return domain
+        
+        # Pattern for .com domains
+        com_pattern = r'\b([a-zA-Z0-9-]+\.com)\b'
+        match = re.search(com_pattern, title_lower)
+        if match:
+            domain = match.group(1)
+            logger.info(f"Extracted .com domain '{domain}' from title '{title}'")
+            return domain
+        
+        # Pattern for other common TLDs
+        other_pattern = r'\b([a-zA-Z0-9-]+\.(org|net|eu|co\.uk|es|it|fr|de))\b'
+        match = re.search(other_pattern, title_lower)
+        if match:
+            domain = match.group(1)
+            logger.info(f"Extracted domain '{domain}' from title '{title}'")
+            return domain
+        
+        return ""
 
     def _validate_fact_check_result(self, result: Dict[str, Any], claim: str) -> Dict[str, Any]:
         """Validate and clean the fact-check result"""

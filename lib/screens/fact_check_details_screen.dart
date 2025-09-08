@@ -816,11 +816,42 @@ ${factCheck.summary ?? 'Nu este disponibil un rezumat.'}
       final url = parts.last.trim();
       if (url.startsWith('http')) {
         final uri = Uri.parse(url);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } else {
-          // Fallback pentru când nu se poate deschide URL-ul
-          debugPrint('Nu se poate deschide URL-ul: $url');
+        try {
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            // Show helpful message for URLs that can't be opened
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text(
+                    '⚠️ Nu se poate deschide acest link. Poți căuta manual articolul pe site-ul respectiv.',
+                  ),
+                  action: SnackBarAction(
+                    label: 'Copiază URL',
+                    onPressed: () {
+                      // Copy URL to clipboard for manual access
+                      debugPrint('URL copiat: $url');
+                    },
+                  ),
+                ),
+              );
+            }
+            debugPrint('Nu se poate deschide URL-ul: $url');
+          }
+        } catch (e) {
+          // Handle launch errors gracefully
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '❌ Eroare la deschiderea link-ului: ${e.toString()}',
+                ),
+                backgroundColor: Colors.red.shade400,
+              ),
+            );
+          }
+          debugPrint('Eroare la lansarea URL-ului $url: $e');
         }
       }
     }
