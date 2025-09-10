@@ -34,7 +34,6 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
     // Pre-completez ID-ul fact-check-ului dacă este furnizat
     if (widget.factCheckId != null) {
       _factCheckIdController.text = widget.factCheckId!;
-      // Pentru informații incorecte, setez cursorul la final pentru ușurința utilizatorului
       if (widget.category == SupportCategory.incorrectInfo) {
         _descriptionController.text = '';
       }
@@ -59,11 +58,9 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            // Category info card
             _buildCategoryInfoCard(context),
             const SizedBox(height: 24),
 
-            // Fact-Check ID field (for incorrect information reports)
             if (widget.category == SupportCategory.incorrectInfo) ...[
               _buildFactCheckIdField(context),
               const SizedBox(height: 16),
@@ -73,17 +70,14 @@ class _SupportFormScreenState extends ConsumerState<SupportFormScreen> {
             _buildDescriptionField(context),
             const SizedBox(height: 16),
 
-            // Source URL field (mandatory for incorrect information)
             if (widget.category.requiresSource) ...[
               _buildSourceField(context),
               const SizedBox(height: 16),
             ],
 
-            // Email field (optional)
             _buildEmailField(context),
             const SizedBox(height: 32),
 
-            // Submit button
             _buildSubmitButton(context),
           ],
         ),

@@ -1,103 +1,106 @@
-# 🇷🇴 Romanian Fact-Checking App
+# CheckIT - Romanian Fact-Checking Application
 
-Aplicație completă de fact-checking pentru știrile din România, construită cu Flutter (frontend) și FastAPI (backend).
+Romanian fact-checking platform built with Flutter frontend and FastAPI backend.
 
-## 🚀 Features Implementate
+## Requirements
 
-### ✅ Frontend (Flutter)
-- **🎨 Design modern** cu Material Design 3
-- **🔍 Căutare și filtrare** fact-check-uri
-- **📱 Responsive UI** pentru web și mobile
-- **🗂️ Categorii** pentru organizarea conținutului
-- **📄 Pagini detaliate** pentru fiecare fact-check
-- **🎯 Navigare cu GoRouter**
-- **⚡ State management cu Riverpod**
-
-### ✅ Backend (FastAPI + PostgreSQL)
-- **🔧 REST API complet** cu documentație automată
-- **🗃️ Baza de date PostgreSQL** cu relații complexe
-- **🐳 Docker containerization** pentru development
-- **📊 Sistem de categorii** pentru organizarea conținutului
-- **🤖 Integrare Gemini AI** pentru categorizare automată
-- **⚡ Redis pentru caching** și queue management
-- **🔒 CORS configurat** pentru frontend
-
-### 🗂️ Categorii Disponibile
-- **⚽ Fotbal** - știri sportive
-- **🏛️ Politică Internă** - politica românească
-- **🌍 Politică Externă** - relații internaționale
-- **💰 Facturi și Utilități** - economie personală
-- **🏥 Sănătate** - informații medicale
-- **💻 Tehnologie** - inovații tech
-- **🌱 Mediu** - ecologie și natură
-- **📈 Economie** - piața și finanțe
-- **📰 Altele** - diverse subiecte
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Flutter 3.35.1** - UI framework
-- **Riverpod 2.5.1** - State management
-- **GoRouter 14.2.0** - Navigation
-- **Dio** - HTTP client
-- **JSON Serialization** pentru modele
-
-### Backend
-- **FastAPI** - Python web framework
-- **PostgreSQL 15** - Baza de date principală
-- **Redis 7** - Caching și queue
-- **SQLAlchemy** - ORM
-- **Pydantic** - Validare date
-- **Google Gemini AI** - Categorizare automată
-- **Docker & Docker Compose** - Containerization
-
-## 🚀 Instalare și Rulare
-
-### Prerequisites
+- Docker and Docker Compose
 - Flutter SDK 3.35.1+
-- Docker & Docker Compose
-- Python 3.11+ (pentru development local)
-- Chrome browser (pentru web)
+- Chrome browser
 
-### 1. Clonează repository
-\`\`\`bash
-git clone <repo-url>
+## Quick Start
+
+### 1. Clone Repository
+
+```bash
+git clone <repository-url>
 cd flutter_application_1
-\`\`\`
+```
 
-### 2. Backend Setup
-\`\`\`bash
+### 2. Start Backend
+
+```bash
 cd backend
 docker-compose up -d
-\`\`\`
+```
 
-Verifică că serviciile rulează:
-\`\`\`bash
+Verify services are running:
+```bash
 docker-compose ps
-\`\`\`
+```
 
-### 3. Seed Data (Prima rulare)
-\`\`\`bash
-# Accesează http://localhost:8000/docs
-# Sau folosește:
+Backend will be available at: `http://localhost:8000`
+API Documentation: `http://localhost:8000/docs`
+
+### 3. Initialize Database (First Time Only)
+
+```bash
 curl -X POST http://localhost:8000/admin/seed-data
-\`\`\`
+```
 
-### 4. Frontend Setup
-\`\`\`bash
+### 4. Start Frontend
+
+```bash
 cd ..
 flutter pub get
 flutter run -d chrome
-\`\`\`
+```
 
-## 📡 API Endpoints
+Frontend will open in Chrome at: `http://localhost:3000`
 
-### Core Endpoints
-- \`GET /fact-checks\` - Lista fact-check-uri (cu filtrare)
-- \`GET /fact-checks?category=health\` - Filtrare pe categorie
-- \`GET /checks/{id}\` - Detalii fact-check specific
-- \`GET /categories\` - Lista categoriilor disponibile
-- \`POST /admin/seed-data\` - Reset date de test
+## Architecture
+
+- **Frontend**: Flutter with Riverpod state management
+- **Backend**: FastAPI with PostgreSQL and Redis
+- **AI**: Google Gemini integration for fact-checking
+- **Analytics**: HyperLogLog for unique user tracking
+
+## API Endpoints
+
+- `GET /checks` - List fact-checks
+- `GET /checks/{id}` - Get specific fact-check
+- `POST /questions` - Submit new question
+- `GET /categories` - Available categories
+
+## Development
+
+### Backend Only
+```bash
+cd backend
+docker-compose up
+```
+
+### Frontend Only
+```bash
+flutter pub get
+flutter run -d chrome
+```
+
+### Reset Database
+```bash
+curl -X POST http://localhost:8000/admin/seed-data
+```
+
+## Configuration
+
+Backend configuration in `backend/app/settings.py`:
+- Database URL
+- Redis URL  
+- API Keys
+
+Frontend API endpoint in `lib/services/api_service.dart`.
+
+## Categories
+
+- Football
+- Internal Politics
+- External Politics
+- Bills & Utilities
+- Health
+- Technology
+- Environment
+- Economy
+- Other
 
 ### API Documentation
 Accesează documentația interactivă la: \`http://localhost:8000/docs\`

@@ -57,5 +57,41 @@
     "createdAt": "2025-09-07T18:15:01.368",
     "userEmail": null,
     "factCheckId": "c8b34059-5739-4506-96c6-9f92aa1da8cd"
+  },
+  {
+    "id": "1757359255193",
+    "category": "incorrectInfo",
+    "description": "Eu am vazut o antilopa care sa moara familia mea daca nu a mancat doi iepuri.",
+    "sourceUrl": "https://www.youtube.com/watch?v=eb9SIkj-ifU",
+    "createdAt": "2025-09-08T22:20:55.193",
+    "userEmail": null,
+    "factCheckId": "44456845-0012-49fe-9c9d-f3f0e82d2aee"
+  },
+  {
+    "id": "1757433101023",
+    "category": "incorrectInfo",
+    "description": "Eu am văzut porci zburători așa că să nu imi spuneți mie că nu există!!1!",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-09T18:51:41.023",
+    "userEmail": null,
+    "factCheckId": "fca3079b-82eb-44d8-a2c7-8206c9b65946"
+  },
+  {
+    "id": "1757433127111",
+    "category": "incorrectInfo",
+    "description": "Vreau sa vad daca merge!",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-09T18:52:07.111",
+    "userEmail": null,
+    "factCheckId": "fca3079b-82eb-44d8-a2c7-8206c9b65946"
+  },
+  {
+    "id": "1757433147962",
+    "category": "incorrectInfo",
+    "description": "sadasdsaasdasdasasdd",
+    "sourceUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1",
+    "createdAt": "2025-09-09T18:52:27.962",
+    "userEmail": null,
+    "factCheckId": "fca3079b-82eb-44d8-a2c7-8206c9b65946"
   }
 ]

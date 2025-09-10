@@ -14,14 +14,12 @@ SessionLocal = sessionmaker(bind=engine)
 db = SessionLocal()
 
 def create_sample_data():
-    """Creează date de test în baza de date."""
+    """Create test data in database."""
     
-    # Ștergem datele existente pentru a începe curat
     db.query(models.Vote).delete()
     db.query(models.Check).delete()
     db.query(models.Question).delete()
     
-    # Date de test pentru întrebări și fact-check-uri românești
     sample_questions = [
         {
             "id": str(uuid.uuid4()),
@@ -60,7 +58,6 @@ def create_sample_data():
         }
     ]
     
-    # Creează întrebările în baza de date
     questions = []
     for q_data in sample_questions:
         question = models.Question(
@@ -74,7 +71,6 @@ def create_sample_data():
         questions.append(question)
         db.add(question)
     
-    # Date pentru fact-check-uri
     sample_checks = [
         {
             "question_id": questions[0].id,
@@ -113,7 +109,6 @@ def create_sample_data():
         }
     ]
     
-    # Creează fact-check-urile în baza de date
     for i, check_data in enumerate(sample_checks):
         check = models.Check(
             id=str(uuid.uuid4()),

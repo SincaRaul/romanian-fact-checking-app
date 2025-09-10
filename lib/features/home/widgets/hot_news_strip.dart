@@ -203,7 +203,6 @@ class _HotCard extends ConsumerWidget {
 }
 
 String _getCategoryLabel(String category) {
-  // TODO: Move this to categories provider for consistency
   switch (category) {
     case 'football':
       return 'Fotbal';

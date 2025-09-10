@@ -10,16 +10,11 @@ logger = logging.getLogger(__name__)
 
 class GeminiService:
     def __init__(self):
-        # Configure the new Gemini client with API key
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        
-        # Define the grounding tool for Google Search
         self.grounding_tool = types.Tool(google_search=types.GoogleSearch())
         
-        # Configure generation settings with grounding and timeouts
         self.config = types.GenerateContentConfig(
             tools=[self.grounding_tool],
-            # Add timeout and other safety settings
             safety_settings=[
                 types.SafetySetting(
                     category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -32,9 +27,8 @@ class GeminiService:
             ]
         )
         
-        # Timeout settings (in seconds) - optimized for Gemini 2.5 Pro
-        self.request_timeout = 90  # Maximum 90 seconds for each request (Pro models can be slower)
-        self.search_timeout = 45   # Maximum 45 seconds for search grounding
+        self.request_timeout = 90
+        self.search_timeout = 45
 
     async def categorize_fact_check(self, title: str, summary: str = None) -> Dict[str, Any]:
         """
@@ -42,7 +36,6 @@ class GeminiService:
         Returns: {"category": "football", "confidence": 0.85, "explanation": "..."}
         """
         
-        # Prepare the prompt for categorization
         text_to_analyze = f"Titlu: {title}"
         if summary:
             text_to_analyze += f"\nRezumat: {summary}"
@@ -73,25 +66,22 @@ Răspunde DOAR cu un JSON în această formă:
 """
 
         try:
-            # Use the client with timeout for categorization
             response = await asyncio.wait_for(
                 asyncio.to_thread(
                     self.client.models.generate_content,
                     model="gemini-2.5-pro",
                     contents=prompt,
-                    config=types.GenerateContentConfig()  # No grounding needed for categorization
+                    config=types.GenerateContentConfig()
                 ),
-                timeout=self.search_timeout  # Shorter timeout for categorization
+                timeout=self.search_timeout
             )
             result_text = response.text.strip()
             
-            # Try to parse JSON response
             if result_text.startswith('```json'):
                 result_text = result_text.replace('```json', '').replace('```', '').strip()
             
             result = json.loads(result_text)
             
-            # Validate the response
             valid_categories = [
                 "football", "politics_internal", "politics_external", 
                 "bills", "health", "technology", "environment", 
@@ -101,7 +91,6 @@ Răspunde DOAR cu un JSON în această formă:
             if result.get("category") not in valid_categories:
                 result["category"] = "other"
             
-            # Ensure confidence is between 0 and 1
             confidence = result.get("confidence", 0.5)
             if confidence > 1:
                 confidence = confidence / 100
@@ -110,7 +99,6 @@ Răspunde DOAR cu un JSON în această formă:
             return result
             
         except Exception as e:
-            # Fallback to "other" category if AI fails
             return {
                 "category": "other",
                 "confidence": 0.1,
@@ -119,7 +107,7 @@ Răspunde DOAR cu un JSON în această formă:
 
     async def generate_fact_check(self, claim: str) -> Dict[str, Any]:
         """
-        Generate a complete fact-check using  Google Search Grounding
+        Generate a complete fact-check using Google Search Grounding
         Returns: {"verdict": "true", "confidence": 85, "summary": "...", "category": "...", "sources": [...]}
         """
         
@@ -139,11 +127,11 @@ INSTRUCȚIUNI CRITICE PENTRU FORMATARE:
 7. NU inventa URL-uri - folosește doar URL-urile reale găsite prin căutare
 
 EXEMPLE DE SCRIERE CORECTĂ:
-✅ CORECT: "Conform surselor oficiale, România a înregistrat o creștere economică în primul trimestru. Guvernul a confirmat aceste cifre prin comunicate de presă."
-❌ GREȘIT: "România a înregistrat o creștere economică [1]. Guvernul a confirmat datele [2]."
+CORECT: "Conform surselor oficiale, România a înregistrat o creștere economică în primul trimestru. Guvernul a confirmat aceste cifre prin comunicate de presă."
+GREȘIT: "România a înregistrat o creștere economică [1]. Guvernul a confirmat datele [2]."
 
-✅ CORECT: "Există mai multe instrumente de testare software cu nume similare, inclusiv Test::Simple pentru Perl și Simple Test pentru Salesforce."
-❌ GREȘIT: "Există Test::Simple [1] și Simple Test [2]."
+CORECT: "Există mai multe instrumente de testare software cu nume similare, inclusiv Test::Simple pentru Perl și Simple Test pentru Salesforce."
+GREȘIT: "Există Test::Simple [1] și Simple Test [2]."
 
 Răspunde DOAR cu un JSON în această formă EXACTĂ:
 {{
@@ -170,37 +158,29 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
 """
 
         try:
-            # Try multiple models with retry system
             response = await self._generate_with_retry(prompt)
             if not response:
                 raise Exception("All models failed to respond")
             
-            # Extract the main result
             result_text = response.text.strip()
             
-            # Clean JSON formatting
             if result_text.startswith('```json'):
                 result_text = result_text.replace('```json', '').replace('```', '').strip()
             
             result = json.loads(result_text)
             
-            # Debug: dump raw response to see where sources are
             self._dump_response_debug(response)
             
-            # Extract real sources using comprehensive method
             real_sources = self._extract_sources(response)
             logger.info(f"Total real sources extracted: {len(real_sources)}")
             
-            # Add real sources to result - prioritize real sources over AI-provided ones
             if real_sources:
                 result["sources"] = real_sources
                 logger.info("Using real sources from grounding")
             else:
                 logger.warning("No grounding sources found for claim: %s", claim[:100])
-                # Also check if sources were provided in the AI response itself
                 ai_sources = result.get("sources", [])
                 if ai_sources and isinstance(ai_sources, list) and len(ai_sources) > 0:
-                    # Use AI-provided sources if they look valid
                     valid_ai_sources = [s for s in ai_sources if s and isinstance(s, str) and len(s.strip()) > 0]
                     if valid_ai_sources:
                         result["sources"] = valid_ai_sources
@@ -210,14 +190,12 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                 else:
                     result["sources"] = ["Nu s-au găsit surse verificabile pentru această afirmație"]
             
-            # Validate result structure
             result = self._validate_fact_check_result(result, claim)
             
             return result
             
         except asyncio.TimeoutError:
             print(f"Timeout error in Gemini fact-check generation after {self.request_timeout}s")
-            # Return fallback result for timeout
             return {
                 "verdict": "unclear",
                 "confidence": 15,
@@ -229,7 +207,6 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
             error_msg = str(e)
             logger.error(f"Error in Gemini fact-check generation: {error_msg}")
             
-            # Provide user-friendly error messages
             if "503" in error_msg or "overloaded" in error_msg.lower() or "UNAVAILABLE" in error_msg:
                 return {
                     "verdict": "unclear",
@@ -258,10 +235,10 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
     async def _generate_with_retry(self, prompt: str):
         """Try models in exact order: 2.5 Pro -> 2.5 Flash -> 1.5 Pro -> 1.5 Flash"""
         models_to_try = [
-            ("gemini-2.5-pro", self.request_timeout),      # First choice
-            ("gemini-2.5-flash", 30),                      # Fast backup
-            ("gemini-1.5-pro", 60),                        # Stable option
-            ("gemini-1.5-flash", 25)                       # Last resort
+            ("gemini-2.5-pro", self.request_timeout),
+            ("gemini-2.5-flash", 30),
+            ("gemini-1.5-pro", 60),
+            ("gemini-1.5-flash", 25)
         ]
         
         last_error = None
@@ -279,15 +256,14 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                     ),
                     timeout=timeout
                 )
-                logger.info(f"✅ SUCCESS with model: {model_name}")
+                logger.info(f"SUCCESS with model: {model_name}")
                 return response
                 
             except Exception as e:
                 error_msg = str(e)
-                logger.warning(f"❌ Model {model_name} failed: {error_msg[:200]}")
+                logger.warning(f"Model {model_name} failed: {error_msg[:200]}")
                 last_error = e
                 
-                # Log what kind of error for debugging
                 if "503" in error_msg or "overloaded" in error_msg.lower() or "UNAVAILABLE" in error_msg:
                     logger.info(f"   Reason: Model overloaded, trying next model...")
                 elif "timeout" in error_msg.lower():
@@ -295,21 +271,17 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                 else:
                     logger.info(f"   Reason: Other error, trying next model...")
                     
-                # Continue to next model
                 continue
         
-        # If all models failed, return None instead of raising
-        logger.error(f"🚫 ALL {len(models_to_try)} MODELS FAILED. Last error: {str(last_error)}")
+        logger.error(f"ALL {len(models_to_try)} MODELS FAILED. Last error: {str(last_error)}")
         return None
 
     def _dump_response_debug(self, response):
         """Debug function to log raw response structure"""
         try:
-            # Best effort: convert to plain dict for safe logging
             if hasattr(response, "to_dict"):
                 d = response.to_dict()
             else:
-                # Fallback: use __dict__ recursively
                 import json
                 d = json.loads(json.dumps(response, default=lambda o: getattr(o, '__dict__', str(o))))
             logger.debug("GEMINI RAW RESPONSE: %s", json.dumps(d, ensure_ascii=False)[:10000])
@@ -317,11 +289,10 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
             logger.warning("Could not dump response: %s", e)
 
     def _extract_sources(self, response) -> list:
-        """Extract sources from groundingMetadata.groundingChunks - keep it simple"""
+        """Extract sources from groundingMetadata.groundingChunks"""
         out = []
 
         try:
-            # Navigate: response.candidates[0].grounding_metadata.grounding_chunks
             cands = getattr(response, "candidates", []) or []
             if cands and len(cands) > 0:
                 grounding_metadata = getattr(cands[0], "grounding_metadata", None)
@@ -336,7 +307,6 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
                                 title = getattr(web, "title", "Sursă web") or "Sursă web"
                                 
                                 if uri.startswith(("http://", "https://")):
-                                    # Clean title 
                                     clean_title = title.replace('[', '').replace(']', '').replace('|', '-')
                                     if len(clean_title) > 80:
                                         clean_title = clean_title[:77] + "..."
@@ -348,7 +318,6 @@ ATENȚIE: Summary-ul trebuie să fie un text COMPLET FLUID fără referințe num
         except Exception as e:
             logger.warning("Error extracting sources: %s", e)
 
-        # Deduplicate
         seen = set()
         unique_sources = []
         for source in out:

@@ -11,14 +11,11 @@ from app.settings import settings
 from app.db import SessionLocal
 from app import models
 
-# Queue helpers
 redis_conn = Redis.from_url(settings.REDIS_URL)
 queue = Queue("build_check", connection=redis_conn)
 
 def enqueue_build_check(question_id: str):
     queue.enqueue(run_build_check, question_id, job_timeout=600)
-
-# Analytics helper functions
 async def compute_hot_score(fact_check_id: str, now: datetime) -> float:
     """Compute hot score for a fact-check using time decay and engagement"""
     try:
@@ -31,7 +28,6 @@ async def compute_hot_score(fact_check_id: str, now: datetime) -> float:
         created_at = await get_fact_check_created_at(fact_check_id)
         age_hours = max(0.0, (now - created_at).total_seconds() / 3600.0)
         
-        # Enhanced formula: more weight on recent activity, faster decay
         score = (uni_2h * 5 + uni_24h * 2) * math.exp(-age_hours / 24.0)
         return score
     except Exception as e:
