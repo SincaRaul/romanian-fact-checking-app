@@ -90,18 +90,6 @@ Backend configuration in `backend/app/settings.py`:
 
 Frontend API endpoint in `lib/services/api_service.dart`.
 
-## Categories
-
-- Football
-- Internal Politics
-- External Politics
-- Bills & Utilities
-- Health
-- Technology
-- Environment
-- Economy
-- Other
-
 ### API Documentation
 Accesează documentația interactivă la: \`http://localhost:8000/docs\`
 
